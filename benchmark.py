@@ -6,6 +6,8 @@ import torch
 
 from transformer_deploy.backends.ort_utils import create_model_for_provider, inference_onnx_binding
 from transformer_deploy.benchmarks.utils import generate_multiple_inputs
+from transformers import AutoModelForCausalLM
+
 
 model_path = "./triton_models/model.onnx"
 provider = "CUDAExecutionProvider"
@@ -31,9 +33,9 @@ inputs_pytorch = generate_multiple_inputs(
         input_names=["input_ids"],
         device="cuda",
         nb_inputs_to_gen=10,
-    )
+)
 
-print(inputs_pytorch)
+
 
 
 Y_onnx = []
@@ -46,7 +48,21 @@ for i in tqdm.tqdm(X):
   duration = time.time() - start_time
   Y_onnx.append(duration)
 
-# plt.plot(X, Y_torch, label="torch")
+
+torch_model = AutoModelForCausalLM.from_pretrained("gpt2").to(0)
+Y_torch = []
+for i in tqdm.tqdm(X):
+  input_ids = torch.tensor([[1]*i]).to(device)
+  attention_mask = torch.tensor([[1]*i]).to(device)
+  start_time = time.time()
+  torch_model(**{"input_ids": input_ids})
+  # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
+  duration = time.time() - start_time
+  Y_torch.append(duration)
+
+plt.plot(X, Y_torch, label="torch")
 plt.plot(X, Y_onnx, label="onnx")
 plt.legend()
+
+plt.savefig('plot.png')
 plt.show()
