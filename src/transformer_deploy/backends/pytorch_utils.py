@@ -153,6 +153,7 @@ def convert_to_onnx(
     if len(input_names) == 0:
         input_names = list(inputs_pytorch.keys())
     with torch.no_grad():
+        print("use_external_data_format=False")
         torch.onnx.export(
             model_pytorch,  # model to optimize
             args=tuple(inputs_pytorch.values()),  # tuple of multiple inputs
@@ -164,6 +165,7 @@ def convert_to_onnx(
             dynamic_axes=dynamic_axis,  # declare dynamix axis for each input / output
             training=TrainingMode.EVAL,  # always put the model in evaluation mode
             verbose=False,
+            use_external_data_format=False
         )
     proto = onnx.load(output_path, load_external_data=False)
     save_onnx(proto=proto, model_path=output_path)
