@@ -9,7 +9,7 @@ from transformer_deploy.benchmarks.utils import generate_multiple_inputs
 from transformers import AutoModelForCausalLM
 
 
-model_path = "./triton_models/model.onnx"
+model_path = "./triton_models/model-original.onnx"
 provider = "CUDAExecutionProvider"
 nb_threads = 1
 ort_model = create_model_for_provider(
