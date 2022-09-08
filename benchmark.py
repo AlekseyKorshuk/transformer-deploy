@@ -5,6 +5,7 @@ import time, tqdm
 import torch
 
 from transformer_deploy.backends.ort_utils import create_model_for_provider, inference_onnx_binding
+from transformer_deploy.benchmarks.utils import generate_multiple_inputs
 
 model_path = "./triton_models/model.onnx"
 provider = "CUDAExecutionProvider"
@@ -23,6 +24,17 @@ def infer_ort(inputs: Dict[str, torch.Tensor]) -> torch.Tensor:
 device = 0
 
 X = list(range(1, 511))
+
+inputs_pytorch = generate_multiple_inputs(
+        batch_size=1,
+        seq_len=3,
+        input_names=["input_ids"],
+        device="cuda",
+        nb_inputs_to_gen=10,
+    )
+
+print(inputs_pytorch)
+
 
 Y_onnx = []
 for i in tqdm.tqdm(X):
