@@ -22,6 +22,7 @@ import argparse
 import gc
 import logging
 import os
+import tqdm
 from pathlib import Path
 from typing import Callable, Dict, List, Tuple, Type, Union
 
@@ -113,11 +114,11 @@ def launch_inference(
     assert type(inputs) == list
     assert len(inputs) > 0
     outputs = list()
-    for batch_input in inputs:
+    for batch_input in tqdm.tqdm(inputs, desc="Checking outputs"):
         output = infer(batch_input)
         outputs.append(output)
     time_buffer: List[int] = list()
-    for _ in range(nb_measures):
+    for _ in tqdm.trange(nb_measures, desc="Speedtest"):
         with track_infer_time(time_buffer):
             _ = infer(inputs[0])
     return outputs, time_buffer
