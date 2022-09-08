@@ -10,7 +10,7 @@ from transformers import AutoModelForCausalLM
 
 
 model_path = "./triton_models/model-original.onnx"
-provider = "CUDAExecutionProvider"
+provider = "CPUExecutionProvider"
 nb_threads = 1
 ort_model = create_model_for_provider(
   path=model_path,
