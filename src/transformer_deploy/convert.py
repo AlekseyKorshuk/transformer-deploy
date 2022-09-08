@@ -198,6 +198,7 @@ def main(commands: argparse.Namespace):
     )
 
     # create onnx model and compare results
+    model_pytorch.to("cpu")
     convert_to_onnx(
         model_pytorch=model_pytorch,
         output_path=onnx_model_path,
@@ -206,6 +207,8 @@ def main(commands: argparse.Namespace):
         var_output_seq=commands.task in ["text-generation", "token-classification", "question-answering"],
         output_names=["output"] if commands.task != "question-answering" else ["start_logits", "end_logits"],
     )
+    if run_on_cuda:
+        model_pytorch.cuda()
 
     timings = {}
 
@@ -262,7 +265,7 @@ def main(commands: argparse.Namespace):
                     tolerance=commands.atol,
                 )
                 timings[engine_name] = time_buffer
-        elif commands.device == "cpu":
+        elif commands.device == "cpu" and False:
             logging.info("preparing Pytorch (INT-8) benchmark")
             model_pytorch = torch.quantization.quantize_dynamic(model_pytorch, {torch.nn.Linear}, dtype=torch.qint8)
             engine_name = "Pytorch (INT-8)"
