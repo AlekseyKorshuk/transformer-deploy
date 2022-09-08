@@ -49,7 +49,7 @@ for i in tqdm.tqdm(X):
   Y_onnx.append(duration)
 
 
-torch_model = AutoModelForCausalLM.from_pretrained("gpt2").to(0)
+torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
 Y_torch = []
 for i in tqdm.tqdm(X):
   input_ids = torch.tensor([[1]*i]).to(device)
