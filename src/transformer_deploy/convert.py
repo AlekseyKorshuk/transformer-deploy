@@ -199,10 +199,13 @@ def main(commands: argparse.Namespace):
 
     # create onnx model and compare results
     model_pytorch.to("cpu")
+    inputs_pytorch_cpu = {
+        "input_ids": inputs_pytorch[0]["input_ids"].cpu()
+    }
     convert_to_onnx(
         model_pytorch=model_pytorch,
         output_path=onnx_model_path,
-        inputs_pytorch=inputs_pytorch[0],
+        inputs_pytorch=inputs_pytorch_cpu,
         quantization=commands.quantization,
         var_output_seq=commands.task in ["text-generation", "token-classification", "question-answering"],
         output_names=["output"] if commands.task != "question-answering" else ["start_logits", "end_logits"],
