@@ -6,7 +6,7 @@ import torch
 
 from transformer_deploy.backends.ort_utils import create_model_for_provider, inference_onnx_binding
 
-model_path = "./triton_models"
+model_path = "./triton_models/model.onnx"
 provider = "CUDAExecutionProvider"
 nb_threads = 1
 ort_model = create_model_for_provider(
