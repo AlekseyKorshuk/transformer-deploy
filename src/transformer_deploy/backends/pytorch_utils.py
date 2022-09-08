@@ -163,7 +163,7 @@ def convert_to_onnx(
             output_names=output_names,  # output names
             dynamic_axes=dynamic_axis,  # declare dynamix axis for each input / output
             training=TrainingMode.EVAL,  # always put the model in evaluation mode
-            verbose=False
+            verbose=True
         )
     proto = onnx.load(output_path, load_external_data=False)
     save_onnx(proto=proto, model_path=output_path)
