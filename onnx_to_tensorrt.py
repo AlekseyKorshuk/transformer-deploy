@@ -52,10 +52,10 @@ from transformer_deploy.utils.args import parse_args
 import tensorrt as trt
 from tensorrt.tensorrt import ICudaEngine, Logger, Runtime
 
-verbose = False
+verbose = True
 tensorrt_path = os.path.join("./triton_models_lit", "model.plan")
 onnx_model_path = os.path.join("./onnx-lit", "model.onnx")
-workspace_size = 10000
+workspace_size = 40000
 fp16 = True
 int8 = False
 
