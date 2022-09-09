@@ -31,7 +31,7 @@ except:
 
 # Test pipeline
 GENERATION_KWARGS = {
-    "max_new_tokens": 32,
+    "max_new_tokens": 1,
     # "min_new_tokens": 8,
     'eos_token_id': 198,
     'do_sample': True,
