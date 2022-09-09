@@ -51,13 +51,6 @@ for i in tqdm.tqdm(X):
 # print(result)
 print(result.size())
 
-check_accuracy(
-    engine_name="ONNX",
-    pytorch_output=onnx_outputs,
-    engine_output=onnx_outputs,
-    tolerance=0.3,
-)
-
 del ort_model
 
 torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
@@ -76,15 +69,8 @@ with torch.no_grad():
 # print(result)
 print(result.size())
 
-check_accuracy(
-    engine_name="ONNX",
-    pytorch_output=torch_outputs,
-    engine_output=onnx_outputs,
-    tolerance=0.3,
-)
-
-plt.plot(X, Y_torch, label="torch")
-plt.plot(X, Y_onnx, label="onnx")
+plt.plot(list(range(len(X))), Y_torch, label="torch")
+plt.plot(list(range(len(X))), Y_onnx, label="onnx")
 plt.legend()
 
 plt.savefig('plot.png')
