@@ -8,6 +8,18 @@ from onnxruntime import ExecutionMode, GraphOptimizationLevel, InferenceSession,
 # model = ORTModelForCausalLM.from_pretrained(save_directory, file_name="model-quantized.onnx")
 from transformer_deploy.backends.ort_utils import create_model_for_provider, torch_to_numpy_dtype_dict, to_pytorch
 
+GENERATION_KWARGS = {
+    "max_new_tokens": 64,
+    'eos_token_id': 198,
+    'do_sample': False,
+    'pad_token_id': 198,
+    'temperature': 0.72,
+    'top_k': 0,
+    'top_p': 0.725,
+    'repetition_penalty': 1.13,
+}
+
+
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
 model = ORTModelForCausalLM.from_pretrained("gpt2", from_transformers=True)
 model.to(torch.device("cuda"))
@@ -16,6 +28,12 @@ input_ids = torch.tensor([[1] * 10] * 1, dtype=torch.int64).to(0)
 attention_mask = torch.tensor([[1] * 10] * 1, dtype=torch.int64).to(0)
 
 output1 = model.model.run(None, {"input_ids": input_ids.cpu().detach().numpy(),
+                                 "attention_mask": attention_mask.cpu().detach().numpy()})
+print(output1)
+print("#" * 100)
+
+
+output1 = model(None, {"input_ids": input_ids.cpu().detach().numpy(),
                                  "attention_mask": attention_mask.cpu().detach().numpy()})
 print(output1)
 print("#" * 100)
