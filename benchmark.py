@@ -46,21 +46,22 @@ for i in tqdm.tqdm(X):
     # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
     duration = time.time() - start_time
     Y_onnx.append(duration)
-print(result)
+# print(result)
 
 del ort_model
 
 torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
 Y_torch = []
-for i in tqdm.tqdm(X):
-    input_ids = torch.tensor([[1] * i]).to(device)
-    attention_mask = torch.tensor([[1] * i]).to(device)
-    start_time = time.time()
-    result = torch_model(**{"input_ids": input_ids})
-    # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
-    duration = time.time() - start_time
-    Y_torch.append(duration)
-print(result)
+with torch.no_grad():
+    for i in tqdm.tqdm(X):
+        input_ids = torch.tensor([[1] * i]).to(device)
+        attention_mask = torch.tensor([[1] * i]).to(device)
+        start_time = time.time()
+        result = torch_model(**{"input_ids": input_ids})
+        # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
+        duration = time.time() - start_time
+        Y_torch.append(duration)
+# print(result)
 
 plt.plot(X, Y_torch, label="torch")
 plt.plot(X, Y_onnx, label="onnx")
