@@ -43,12 +43,12 @@ for i in tqdm.tqdm(X):
     # attention_mask = torch.tensor([[i] * i] * batch_size, dtype=torch.int64).to(device)
     inputs = tokenizer(i, return_tensors="pt").to(0)
     start_time = time.time()
-    result = infer_ort({"input_ids": inputs.input_ids, "attention_mask": inputs.attention_mask})
+    result = infer_ort({"input_ids": inputs.input_ids, "attention_mask": inputs.attention_mask})["logits"].detach()
     # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
     duration = time.time() - start_time
     Y_onnx.append(duration)
     onnx_outputs.append(result)
-print(result)
+# print(result)
 print(result.size())
 
 del ort_model
@@ -66,7 +66,7 @@ with torch.no_grad():
         duration = time.time() - start_time
         Y_torch.append(duration)
         torch_outputs.append(result)
-print(result)
+# print(result)
 print(result.size())
 
 check_accuracy(
