@@ -39,8 +39,8 @@ inputs_pytorch = generate_multiple_inputs(
 
 Y_onnx = []
 for i in tqdm.tqdm(X):
-    input_ids = torch.tensor([[1] * i], dtype=torch.int64).to(device)
-    attention_mask = torch.tensor([[1] * i], dtype=torch.int64).to(device)
+    input_ids = torch.tensor([[[1] * i]*4], dtype=torch.int64).to(device)
+    attention_mask = torch.tensor([[[1] * i]*4], dtype=torch.int64).to(device)
     start_time = time.time()
     result = infer_ort({"input_ids": input_ids, "attention_mask": attention_mask})
     # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
@@ -54,8 +54,8 @@ torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0
 Y_torch = []
 with torch.no_grad():
     for i in tqdm.tqdm(X):
-        input_ids = torch.tensor([[1] * i]).to(device)
-        attention_mask = torch.tensor([[1] * i]).to(device)
+        input_ids = torch.tensor([[[1] * i]*4]).to(device)
+        attention_mask = torch.tensor([[[1] * i]*4]).to(device)
         start_time = time.time()
         result = torch_model(**{"input_ids": input_ids})
         # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
