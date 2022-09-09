@@ -6,7 +6,7 @@ import torch
 from onnxruntime import ExecutionMode, GraphOptimizationLevel, InferenceSession, IOBinding, OrtValue, SessionOptions
 
 # model = ORTModelForCausalLM.from_pretrained(save_directory, file_name="model-quantized.onnx")
-from transformer_deploy.backends.ort_utils import create_model_for_provider, torch_to_numpy_dtype_dict, to_pytorch
+from transformer_deploy.backends.ort_utils import create_model_for_provider, torch_to_numpy_dtype_dict, to_pytorch, inference_onnx_binding
 
 GENERATION_KWARGS = {
     "max_new_tokens": 64,
@@ -39,72 +39,6 @@ print(output1)
 print("#" * 100)
 
 
-def inference_onnx_binding(
-        model_onnx: InferenceSession,
-        inputs: Dict[str, torch.Tensor],
-        device: str,
-        device_id: int = 0,
-        binding: Optional[IOBinding] = None,
-        clone_tensor: bool = True,
-) -> Dict[str, torch.Tensor]:
-    """
-    Performs inference on ONNX Runtime in an optimized way.
-    In particular, it avoids any Onnx Runtime output tensor copy.
-    It means that Onnx Runtime is still owner of the array, and it will overwrite its content if you do another
-    inference. To avoid any issue, just set clone_tensor to True (default).
-    For best performance and lowest memory footprint, if you know what you are doing, set clone_tensor to False.
-
-    :param model_onnx: ONNX model
-    :param inputs: input torch tensor
-    :param device: where to run the inference. One of [cpu, cuda]
-    :param device_id: ID of the device where to run the inference, to be used when there are multiple GPUs, etc.
-    :param binding: previously generated binding IO, will be reset.
-    :param clone_tensor: clone Pytorch tensor to avoid its content being overwritten by Onnx Runtime
-        at the next inference call.
-    :return: a dict {axis name: output tensor}
-    """
-    assert isinstance(device, str)
-    assert device in ["cpu", "cuda"], f"unexpected inference device: '{device}'"
-    if binding is None:
-        binding: IOBinding = model_onnx.io_binding()
-    else:
-        binding.clear_binding_inputs()
-        binding.clear_binding_outputs()
-    for input_onnx in model_onnx.get_inputs():
-        if input_onnx.name not in inputs:  # some inputs may be optional
-            continue
-        tensor: torch.Tensor = inputs[input_onnx.name]
-        tensor = tensor.detach()
-        # if tensor.dtype in [torch.int64, torch.long]:
-        #     # int32 mandatory as input of bindings, int64 not supported
-        #     tensor = tensor.type(dtype=torch.int32)
-        tensor = tensor.contiguous()
-        binding.bind_input(
-            name=input_onnx.name,
-            device_type=device,
-            device_id=device_id,
-            element_type=torch_to_numpy_dtype_dict[tensor.dtype],
-            shape=tuple(tensor.shape),
-            buffer_ptr=tensor.data_ptr(),
-        )
-        inputs[input_onnx.name] = tensor
-
-    for out in model_onnx.get_outputs():
-        binding.bind_output(
-            name=out.name,
-            device_type=device,
-            device_id=device_id,
-        )
-    binding.synchronize_inputs()
-    model_onnx.run_with_iobinding(binding)
-    binding.synchronize_outputs()
-    outputs = dict()
-    assert len(model_onnx.get_outputs()) == len(
-        binding.get_outputs()
-    ), f"{len(model_onnx.get_outputs())} != {len(binding.get_outputs())}"
-    for out, t in zip(model_onnx.get_outputs(), binding.get_outputs()):
-        outputs[out.name] = to_pytorch(t, clone_tensor=clone_tensor)
-    return outputs
 
 
 class InferenceSessionWithIOBinding(InferenceSession):

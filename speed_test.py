@@ -6,6 +6,16 @@ import deepspeed
 import tqdm
 from datasets import load_dataset
 import warnings
+from typing import Dict, Optional
+
+from optimum.onnxruntime import ORTModelForCausalLM
+from transformers import pipeline, AutoTokenizer
+import torch
+from onnxruntime import ExecutionMode, GraphOptimizationLevel, InferenceSession, IOBinding, OrtValue, SessionOptions
+
+# model = ORTModelForCausalLM.from_pretrained(save_directory, file_name="model-quantized.onnx")
+from transformer_deploy.backends.ort_utils import create_model_for_provider, torch_to_numpy_dtype_dict, to_pytorch
+
 
 warnings.filterwarnings("ignore")
 dataset = load_dataset("ChaiML/user_model_inputs")
@@ -39,16 +49,7 @@ INPUT_EXAMPLES = dataset["train"]["text"][:100]
 example = INPUT_EXAMPLES[0]
 model = AutoModelForCausalLM.from_pretrained(model_id).half().to(0)
 
-max_batch_size = 1
-for i in range(1, 5):
-    try:
-        inputs = tokenizer([example] * i, return_tensors='pt').to(0)
-        result = model.generate(**inputs, **GENERATION_KWARGS)
-        print(f"Batch size: {i}")
-        max_batch_size = i
-    except Exception as ex:
-        print(ex)
-        break
+max_batch_size = 4
 
 # torch_pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, device=0)
 print("Pytorch single batch")
@@ -68,6 +69,11 @@ except Exception as ex:
     print(ex)
 # print(torch_output)
 # init deepspeed inference engine
+
+ort_model = ORTModelForCausalLM.from_pretrained("gpt2", from_transformers=True)
+ort_model.to(torch.device("cuda"))
+
+
 ds_model = deepspeed.init_inference(
     model=model,  # Transformers models
     mp_size=1,  # Number of GPU
