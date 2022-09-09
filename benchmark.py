@@ -58,7 +58,6 @@ with torch.no_grad():
         attention_mask = torch.tensor([[1] * i] * 4).to(device)
         start_time = time.time()
         result = torch_model(**{"input_ids": input_ids})
-        # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
         duration = time.time() - start_time
         Y_torch.append(duration)
 print(result)
