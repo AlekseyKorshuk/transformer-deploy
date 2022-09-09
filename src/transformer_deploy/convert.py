@@ -387,6 +387,8 @@ def main(commands: argparse.Namespace):
             ort_output, time_buffer = launch_inference(
                 infer=infer_ort, inputs=inputs_pytorch, nb_measures=commands.nb_measures
             )
+            print(pytorch_output)
+            print(pytorch_output[0].size())
             check_accuracy(
                 engine_name=benchmark_name,
                 pytorch_output=pytorch_output,
