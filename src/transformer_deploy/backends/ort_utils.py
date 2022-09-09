@@ -263,9 +263,9 @@ def inference_onnx_binding(
             continue
         tensor: torch.Tensor = inputs[input_onnx.name]
         tensor = tensor.detach()
-        if tensor.dtype in [torch.int64, torch.long]:
-            # int32 mandatory as input of bindings, int64 not supported
-            tensor = tensor.type(dtype=torch.int32)
+        # if tensor.dtype in [torch.int64, torch.long]:
+        #     # int32 mandatory as input of bindings, int64 not supported
+        #     tensor = tensor.type(dtype=torch.int32)
         tensor = tensor.contiguous()
         binding.bind_input(
             name=input_onnx.name,
