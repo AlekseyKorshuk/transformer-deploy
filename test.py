@@ -142,7 +142,7 @@ print(result)
 print("#" * 100)
 
 inputs = tokenizer("Hello,", return_tensors="pt").to(0)
-result = model.generate(**inputs)
+result = model.generate(**inputs, **GENERATION_KWARGS)
 # pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, device=0)
 # result = pipe("Hello,")
 print(result)
