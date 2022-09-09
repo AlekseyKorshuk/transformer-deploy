@@ -44,7 +44,7 @@ for i in tqdm.tqdm(X):
   input_ids = torch.tensor([[1]*i], dtype=torch.int64).to(device)
   attention_mask = torch.tensor([[1]*i], dtype=torch.int64).to(device)
   start_time = time.time()
-  infer_ort({"input_ids": input_ids})
+  infer_ort({"input_ids": input_ids, "attention_mask": attention_mask})
   # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
   duration = time.time() - start_time
   Y_onnx.append(duration)
