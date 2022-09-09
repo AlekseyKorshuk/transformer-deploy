@@ -10,7 +10,7 @@ from transformers import AutoModelForCausalLM
 
 
 model_path = "./triton_models/model.onnx"
-model_path = "./onnx/model.onnx"
+model_path = "./onnx-lit/model.onnx"
 provider = "CUDAExecutionProvider"
 nb_threads = 1
 ort_model = create_model_for_provider(
@@ -45,10 +45,11 @@ for i in tqdm.tqdm(X):
   input_ids = torch.tensor([[1]*i], dtype=torch.int64).to(device)
   attention_mask = torch.tensor([[1]*i], dtype=torch.int64).to(device)
   start_time = time.time()
-  infer_ort({"input_ids": input_ids, "attention_mask": attention_mask})
+  result = infer_ort({"input_ids": input_ids, "attention_mask": attention_mask})
   # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
   duration = time.time() - start_time
   Y_onnx.append(duration)
+print(result)
 
 
 torch_model = AutoModelForCausalLM.from_pretrained("gpt2").to(0)
