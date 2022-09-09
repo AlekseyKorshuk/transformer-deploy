@@ -12,7 +12,11 @@ model.to(torch.device("cuda"))
 input_ids = torch.tensor([[1] * 10] * 1, dtype=torch.int64).to(0)
 attention_mask = torch.tensor([[1] * 10] * 1, dtype=torch.int64).to(0)
 
-output1 = model.model.run(None, {"input_ids":input_ids.cpu().detach().numpy(), "attention_mask": attention_mask.cpu().detach().numpy()})
+output1 = model.model.run(None, {"input_ids": input_ids.cpu().detach().numpy(),
+                                 "attention_mask": attention_mask.cpu().detach().numpy()})
+print(output1)
+print("#" * 100)
+
 
 class InferenceSessionWithIOBinding(InferenceSession):
     def __init__(self, model_path, provider, nb_threads=1):
@@ -25,3 +29,12 @@ class InferenceSessionWithIOBinding(InferenceSession):
     def run(self, output_names, input_feed, run_options=None):
         results = inference_onnx_binding(model_onnx=self.ort_model, inputs=input_feed, device="cuda")
         return results
+
+
+model_path = "onnx-gpt2/model.onnx"
+provider = "CUDAExecutionProvider"
+nb_threads = 1
+
+engine = InferenceSessionWithIOBinding(model_path=model_path, provider=provider, nb_threads=nb_threads)
+
+output2 = engine.run(None, {"input_ids": input_ids, "attention_mask": attention_mask})
