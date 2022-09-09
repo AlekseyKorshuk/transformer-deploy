@@ -4,8 +4,8 @@ from transformer_deploy.backends.pytorch_utils import get_model_size
 from transformers import AutoConfig, PretrainedConfig
 
 model = "hakurei/litv2-6B-rev2"
-onnx_model_path = os.path.join("./onnx_lit", "model.onnx")
-onnx_optim_model_path = os.path.join("./onnx_lit", "model-optimized.onnx")
+onnx_model_path = os.path.join("./onnx-lit", "model.onnx")
+onnx_optim_model_path = os.path.join("./onnx-lit", "model-optimized.onnx")
 model_config: PretrainedConfig = AutoConfig.from_pretrained(
     pretrained_model_name_or_path=model
 )
