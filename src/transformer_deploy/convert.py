@@ -182,7 +182,7 @@ def main(commands: argparse.Namespace):
         raise Exception(f"unknown task: {commands.task}")
 
     logging.info(f"axis: {input_names}")
-
+    model_pytorch.half()
     model_pytorch.eval()
     if run_on_cuda:
         model_pytorch.cuda()
