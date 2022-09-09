@@ -73,5 +73,5 @@ engine: ICudaEngine = build_engine(
     int8=int8,
 )
 print("here")
-print(engine.__dict__)
+# print(engine.__dict__)
 save_engine(engine=engine, engine_file_path=tensorrt_path)
