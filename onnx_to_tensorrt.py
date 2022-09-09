@@ -54,8 +54,8 @@ from tensorrt.tensorrt import ICudaEngine, Logger, Runtime
 
 verbose = False
 tensorrt_path = os.path.join("./triton_models", "model.plan")
-onnx_model_path = os.path.join("./triton_models", "model-original.onnx")
-workspace_size = 10000
+onnx_model_path = os.path.join("./onnx-lit", "model.onnx")
+workspace_size = 40000
 fp16 = True
 int8 = False
 
