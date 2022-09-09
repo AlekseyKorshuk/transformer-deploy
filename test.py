@@ -19,7 +19,6 @@ GENERATION_KWARGS = {
     'repetition_penalty': 1.13,
 }
 
-
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
 model = ORTModelForCausalLM.from_pretrained("gpt2", from_transformers=True)
 model.to(torch.device("cuda"))
@@ -122,7 +121,7 @@ class InferenceSessionWithIOBinding(InferenceSession):
         results = inference_onnx_binding(model_onnx=self.ort_model, inputs=input_feed, device="cuda")
         logits = results["logits"]
         output = logits.cpu().numpy()
-        return output
+        return [output]
 
 
 model_path = "onnx-gpt2/model.onnx"
