@@ -53,9 +53,9 @@ import tensorrt as trt
 from tensorrt.tensorrt import ICudaEngine, Logger, Runtime
 
 verbose = False
-tensorrt_path = os.path.join("./triton_models", "model.plan")
+tensorrt_path = os.path.join("./triton_models_lit", "model.plan")
 onnx_model_path = os.path.join("./onnx-lit", "model.onnx")
-workspace_size = 40000
+workspace_size = 10000
 fp16 = True
 int8 = False
 
@@ -65,7 +65,7 @@ engine: ICudaEngine = build_engine(
     runtime=runtime,
     onnx_file_path=onnx_model_path,
     logger=trt_logger,
-    min_shape=(1, 1),
+    min_shape=(1, 6),
     optimal_shape=(1, 256),
     max_shape=(1, 256),
     workspace_size=workspace_size * 1024 * 1024,
