@@ -10,7 +10,9 @@ model_config: PretrainedConfig = AutoConfig.from_pretrained(
     pretrained_model_name_or_path=model
 )
 
-num_attention_heads, hidden_size = get_model_size(path=model)
+num_attention_heads = 16
+hidden_size = 4096
+# num_attention_heads, hidden_size = get_model_size(path=model)
 
 optimize_onnx(
     onnx_path=onnx_model_path,
