@@ -22,7 +22,8 @@ ort_model = create_model_for_provider(
 
 def infer_ort(inputs: Dict[str, torch.Tensor]) -> torch.Tensor:
   results = inference_onnx_binding(model_onnx=ort_model, inputs=inputs, device="cuda")
-  return results["output"] if "output" in results else (results["start_logits"], results["end_logits"])
+  return results
+  # return results["output"] if "output" in results else (results["start_logits"], results["end_logits"])
 
 device = 0
 
