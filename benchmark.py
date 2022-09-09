@@ -9,6 +9,8 @@ from transformer_deploy.benchmarks.utils import generate_multiple_inputs
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset
 
+from transformer_deploy.convert import check_accuracy
+
 dataset = load_dataset("ChaiML/user_model_inputs")
 
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
@@ -32,9 +34,10 @@ def infer_ort(inputs: Dict[str, torch.Tensor]) -> torch.Tensor:
 
 device = 0
 batch_size = 1
-X = dataset["train"]["text"][:500]
+X = dataset["train"]["text"][:10]
 
 Y_onnx = []
+onnx_outputs = []
 for i in tqdm.tqdm(X):
     # input_ids = torch.tensor([[i] * i] * batch_size, dtype=torch.int64).to(device)
     # attention_mask = torch.tensor([[i] * i] * batch_size, dtype=torch.int64).to(device)
@@ -44,22 +47,32 @@ for i in tqdm.tqdm(X):
     # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
     duration = time.time() - start_time
     Y_onnx.append(duration)
+    onnx_outputs.append(result)
 print(result)
 
 del ort_model
 
 torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
 Y_torch = []
+torch_outputs = []
 with torch.no_grad():
     for i in tqdm.tqdm(X):
         # input_ids = torch.tensor([[i] * i] * batch_size).to(device)
         # attention_mask = torch.tensor([[i] * i] * batch_size).to(device)
         inputs = tokenizer(i, return_tensors="pt").to(0)
         start_time = time.time()
-        result = torch_model(**inputs)
+        result = torch_model(**inputs).logits
         duration = time.time() - start_time
         Y_torch.append(duration)
+        torch_outputs.append(result)
 print(result)
+
+check_accuracy(
+    engine_name="ONNX",
+    pytorch_output=torch_outputs,
+    engine_output=onnx_outputs,
+    tolerance=0.3,
+)
 
 plt.plot(X, Y_torch, label="torch")
 plt.plot(X, Y_onnx, label="onnx")
