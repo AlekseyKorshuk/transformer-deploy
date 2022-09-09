@@ -6,7 +6,12 @@ import torch
 
 from transformer_deploy.backends.ort_utils import create_model_for_provider, inference_onnx_binding
 from transformer_deploy.benchmarks.utils import generate_multiple_inputs
-from transformers import AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from datasets import load_dataset
+
+dataset = load_dataset("ChaiML/user_model_inputs")
+
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
 
 model_path = "./triton_models/model.onnx"
 model_path = "./onnx-lit/model.onnx"
@@ -27,14 +32,15 @@ def infer_ort(inputs: Dict[str, torch.Tensor]) -> torch.Tensor:
 
 device = 0
 batch_size = 1
-X = list(range(1, 512))
+X = dataset["train"]["text"][:500]
 
 Y_onnx = []
 for i in tqdm.tqdm(X):
-    input_ids = torch.tensor([[i] * i] * batch_size, dtype=torch.int64).to(device)
-    attention_mask = torch.tensor([[i] * i] * batch_size, dtype=torch.int64).to(device)
+    # input_ids = torch.tensor([[i] * i] * batch_size, dtype=torch.int64).to(device)
+    # attention_mask = torch.tensor([[i] * i] * batch_size, dtype=torch.int64).to(device)
+    inputs = tokenizer(i, return_tensors="pt").to(0)
     start_time = time.time()
-    result = infer_ort({"input_ids": input_ids, "attention_mask": attention_mask})
+    result = infer_ort(**inputs)
     # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
     duration = time.time() - start_time
     Y_onnx.append(duration)
@@ -46,10 +52,11 @@ torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0
 Y_torch = []
 with torch.no_grad():
     for i in tqdm.tqdm(X):
-        input_ids = torch.tensor([[i] * i] * batch_size).to(device)
-        attention_mask = torch.tensor([[i] * i] * batch_size).to(device)
+        # input_ids = torch.tensor([[i] * i] * batch_size).to(device)
+        # attention_mask = torch.tensor([[i] * i] * batch_size).to(device)
+        inputs = tokenizer(i, return_tensors="pt").to(0)
         start_time = time.time()
-        result = torch_model(**{"input_ids": input_ids})
+        result = torch_model(**inputs)
         duration = time.time() - start_time
         Y_torch.append(duration)
 print(result)
