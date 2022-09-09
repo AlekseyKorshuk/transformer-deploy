@@ -46,7 +46,7 @@ for i in tqdm.tqdm(X):
     # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
     duration = time.time() - start_time
     Y_onnx.append(duration)
-# print(result)
+print(result)
 
 del ort_model
 
@@ -61,7 +61,7 @@ with torch.no_grad():
         # data = onnx_model(input_ids=input_ids, attention_mask=attention_mask)
         duration = time.time() - start_time
         Y_torch.append(duration)
-# print(result)
+print(result["logits"])
 
 plt.plot(X, Y_torch, label="torch")
 plt.plot(X, Y_onnx, label="onnx")
