@@ -42,7 +42,7 @@ GENERATION_KWARGS = {
     'repetition_penalty': 1.13,
 }
 
-INPUT_EXAMPLES = dataset["train"]["text"][:100]
+INPUT_EXAMPLES = dataset["train"]["text"][:1000]
 
 example = INPUT_EXAMPLES[0]
 model = AutoModelForCausalLM.from_pretrained(model_id).half().to(0)
@@ -52,7 +52,7 @@ max_batch_size = 4
 # torch_pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, device=0)
 print("Pytorch single batch")
 torch_outputs = []
-for example in tqdm.tqdm(INPUT_EXAMPLES[:20], desc="Pytorch single batch"):
+for example in tqdm.tqdm(INPUT_EXAMPLES, desc="Pytorch single batch"):
     inputs = tokenizer(example, return_tensors='pt').to(0)
     result = model(**inputs)
     # torch_output = torch_pipe(example, **GENERATION_KWARGS)[0]["generated_text"][len(example):]
@@ -60,7 +60,7 @@ for example in tqdm.tqdm(INPUT_EXAMPLES[:20], desc="Pytorch single batch"):
 print("Pytorch batch size")
 torch_outputs = []
 try:
-    for example in tqdm.tqdm(INPUT_EXAMPLES[:10], desc="Pytorch batch size"):
+    for example in tqdm.tqdm(INPUT_EXAMPLES, desc="Pytorch batch size"):
         inputs = tokenizer([example] * max_batch_size, return_tensors='pt').to(0)
         result = model(**inputs)
 except Exception as ex:
@@ -102,14 +102,14 @@ ort_model.model = engine
 
 print("Accelerated single batch")
 accelerated_outputs = []
-for example in tqdm.tqdm(INPUT_EXAMPLES[:20], desc="Accelerated single batch"):
+for example in tqdm.tqdm(INPUT_EXAMPLES, desc="Accelerated single batch"):
     inputs = tokenizer(example, return_tensors='pt').to(0)
     result = ort_model(**inputs)
 
 print("Accelerated batch size")
 accelerated_outputs = []
 try:
-    for example in tqdm.tqdm(INPUT_EXAMPLES[:10], desc="Accelerated batch size"):
+    for example in tqdm.tqdm(INPUT_EXAMPLES, desc="Accelerated batch size"):
         inputs = tokenizer([example] * max_batch_size, return_tensors='pt').to(0)
         result = ort_model(**inputs)
 except Exception as ex:
