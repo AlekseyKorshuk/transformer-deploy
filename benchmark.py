@@ -26,7 +26,7 @@ def infer_ort(inputs: Dict[str, torch.Tensor]) -> torch.Tensor:
 
 device = 0
 
-X = list(range(1, 511))
+X = list(range(1, 512))
 
 inputs_pytorch = generate_multiple_inputs(
         batch_size=1,
