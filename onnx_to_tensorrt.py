@@ -53,8 +53,8 @@ import tensorrt as trt
 from tensorrt.tensorrt import ICudaEngine, Logger, Runtime
 
 verbose = True
-tensorrt_path = os.path.join("./triton_models_lit", "model.plan")
-onnx_model_path = os.path.join("./triton_models_old", "model-original.onnx")
+tensorrt_path = os.path.join("./gpt2_model", "model.plan")
+onnx_model_path = os.path.join("./gpt2_model", "model-original.onnx")
 workspace_size = 40000
 fp16 = True
 int8 = False
