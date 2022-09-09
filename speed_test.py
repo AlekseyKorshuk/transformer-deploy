@@ -42,7 +42,7 @@ GENERATION_KWARGS = {
     'repetition_penalty': 1.13,
 }
 
-INPUT_EXAMPLES = dataset["train"]["text"][:1000]
+INPUT_EXAMPLES = dataset["train"]["text"][:500]
 
 example = INPUT_EXAMPLES[0]
 model = AutoModelForCausalLM.from_pretrained(model_id).half().to(0)
