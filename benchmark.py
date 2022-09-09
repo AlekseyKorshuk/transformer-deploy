@@ -9,8 +9,8 @@ from transformer_deploy.benchmarks.utils import generate_multiple_inputs
 from transformers import AutoModelForCausalLM
 
 
-model_path = "./triton_models/model-original.onnx"
-provider = "CPUExecutionProvider"
+model_path = "./triton_models/model.onnx"
+provider = "CUDAExecutionProvider"
 nb_threads = 1
 ort_model = create_model_for_provider(
   path=model_path,
@@ -49,7 +49,7 @@ for i in tqdm.tqdm(X):
   Y_onnx.append(duration)
 
 
-torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
+torch_model = AutoModelForCausalLM.from_pretrained("gpt2").to(0)
 Y_torch = []
 for i in tqdm.tqdm(X):
   input_ids = torch.tensor([[1]*i]).to(device)
