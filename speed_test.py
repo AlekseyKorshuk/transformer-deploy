@@ -1,8 +1,6 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline, AutoModelForCausalLM
 from transformers import pipeline
-from deepspeed.module_inject import HFBertLayerPolicy
-import deepspeed
 import tqdm
 from datasets import load_dataset
 import warnings
