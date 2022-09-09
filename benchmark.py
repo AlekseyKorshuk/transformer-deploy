@@ -51,6 +51,7 @@ for i in tqdm.tqdm(X):
   Y_onnx.append(duration)
 print(result)
 
+del ort_model
 
 torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
 Y_torch = []
