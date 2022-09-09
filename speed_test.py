@@ -54,7 +54,7 @@ print("Pytorch single batch")
 torch_outputs = []
 for example in tqdm.tqdm(INPUT_EXAMPLES[:20], desc="Pytorch single batch"):
     inputs = tokenizer(example, return_tensors='pt').to(0)
-    result = model.generate(**inputs, **GENERATION_KWARGS)
+    result = model(**inputs)
     # torch_output = torch_pipe(example, **GENERATION_KWARGS)[0]["generated_text"][len(example):]
     # torch_outputs.append(torch_output)
 print("Pytorch batch size")
@@ -62,7 +62,7 @@ torch_outputs = []
 try:
     for example in tqdm.tqdm(INPUT_EXAMPLES[:10], desc="Pytorch batch size"):
         inputs = tokenizer([example] * max_batch_size, return_tensors='pt').to(0)
-        result = model.generate(**inputs, **GENERATION_KWARGS)
+        result = model(**inputs)
 except Exception as ex:
     print(ex)
 # print(torch_output)
@@ -104,14 +104,14 @@ print("Accelerated single batch")
 accelerated_outputs = []
 for example in tqdm.tqdm(INPUT_EXAMPLES[:20], desc="Accelerated single batch"):
     inputs = tokenizer(example, return_tensors='pt').to(0)
-    result = ort_model.generate(**inputs, **GENERATION_KWARGS)
+    result = ort_model(**inputs)
 
 print("Accelerated batch size")
 accelerated_outputs = []
 try:
     for example in tqdm.tqdm(INPUT_EXAMPLES[:10], desc="Accelerated batch size"):
         inputs = tokenizer([example] * max_batch_size, return_tensors='pt').to(0)
-        result = ort_model.generate(**inputs, **GENERATION_KWARGS)
+        result = ort_model(**inputs)
 except Exception as ex:
     print(ex)
 # accelerated_output = ds_clf(example, **GENERATION_KWARGS)[0]["generated_text"][len(example):]
