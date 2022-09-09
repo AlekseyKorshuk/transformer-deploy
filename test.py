@@ -8,6 +8,7 @@ from onnxruntime import ExecutionMode, GraphOptimizationLevel, InferenceSession,
 # model = ORTModelForCausalLM.from_pretrained(save_directory, file_name="model-quantized.onnx")
 from transformer_deploy.backends.ort_utils import create_model_for_provider, torch_to_numpy_dtype_dict, to_pytorch
 
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
 model = ORTModelForCausalLM.from_pretrained("gpt2", from_transformers=True)
 model.to(torch.device("cuda"))
 
@@ -113,9 +114,15 @@ engine = InferenceSessionWithIOBinding(model_path=model_path, provider=provider,
 
 output2 = engine.run(None, {"input_ids": input_ids, "attention_mask": attention_mask})
 print(output2)
+print("#" * 100)
 
 model.model = engine
 
 result = model(**{"input_ids": input_ids, "attention_mask": attention_mask})
 
+print(result)
+print("#" * 100)
+
+pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, device=0)
+result = pipe("Hello,")
 print(result)
