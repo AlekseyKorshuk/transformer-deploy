@@ -51,6 +51,13 @@ for i in tqdm.tqdm(X):
 # print(result)
 print(result.size())
 
+check_accuracy(
+    engine_name="ONNX",
+    pytorch_output=onnx_outputs,
+    engine_output=onnx_outputs,
+    tolerance=0.3,
+)
+
 del ort_model
 
 torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
