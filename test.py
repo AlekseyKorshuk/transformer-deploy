@@ -32,9 +32,10 @@ output1 = model.model.run(None, {"input_ids": input_ids.cpu().detach().numpy(),
 print(output1)
 print("#" * 100)
 
+input_ids = torch.tensor([[1] * 10] * 1, dtype=torch.int64).to(0)
+attention_mask = torch.tensor([[1] * 10] * 1, dtype=torch.int64).to(0)
 
-output1 = model(None, {"input_ids": input_ids.cpu().detach().numpy(),
-                                 "attention_mask": attention_mask.cpu().detach().numpy()})
+output1 = model(input_ids=input_ids, attention_mask=attention_mask)
 print(output1)
 print("#" * 100)
 
