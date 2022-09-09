@@ -38,3 +38,4 @@ nb_threads = 1
 engine = InferenceSessionWithIOBinding(model_path=model_path, provider=provider, nb_threads=nb_threads)
 
 output2 = engine.run(None, {"input_ids": input_ids, "attention_mask": attention_mask})
+print(output2)
