@@ -48,8 +48,14 @@ optimizer = ORTOptimizer.from_pretrained(
 )
 
 # Export the optimized model
-optimizer.export(
-    onnx_model_path=onnx_model_path,
-    onnx_optimized_model_output_path=onnx_optim_model_path,
+# optimizer.export(
+#     onnx_model_path=onnx_model_path,
+#     onnx_optimized_model_output_path=onnx_optim_model_path,
+#     optimization_config=optimization_config,
+# )
+
+optimizer.optimize(
     optimization_config=optimization_config,
+    save_dir="./onnx-lit",
+
 )
