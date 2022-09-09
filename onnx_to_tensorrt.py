@@ -33,7 +33,7 @@ from transformer_deploy.backends.pytorch_utils import (
     infer_feature_extraction_pytorch,
 )
 from transformer_deploy.backends.st_utils import STransformerWrapper, load_sentence_transformers
-from transformer_deploy.backends.trt_utils import build_engine, save_engine
+from transformer_deploy.backends.trt_utils import build_engine, save_engine, load_engine
 from transformer_deploy.benchmarks.utils import (
     compare_outputs,
     generate_multiple_inputs,
@@ -75,3 +75,9 @@ engine: ICudaEngine = build_engine(
 print("here")
 # print(engine.__dict__)
 save_engine(engine=engine, engine_file_path=tensorrt_path)
+
+tensorrt_model: Callable[[Dict[str, torch.Tensor]], Dict[str, torch.Tensor]] = load_engine(
+    runtime=runtime, engine_file_path=tensorrt_path
+)
+
+tensorrt_model

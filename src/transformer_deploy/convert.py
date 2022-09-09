@@ -355,22 +355,22 @@ def main(commands: argparse.Namespace):
     if "onnx" in commands.backend:
         num_attention_heads, hidden_size = get_model_size(path=commands.model)
         # create optimized onnx model and compare results
-        optimize_onnx(
-            onnx_path=onnx_model_path,
-            onnx_optim_model_path=onnx_optim_model_path,
-            fp16=run_on_cuda,
-            use_cuda=run_on_cuda,
-            num_attention_heads=num_attention_heads,
-            hidden_size=hidden_size,
-            architecture=model_config.model_type,
-        )
-        if commands.device == "cpu" and commands.quantization:
-            cpu_quantization(input_model_path=onnx_optim_model_path, output_model_path=onnx_optim_model_path)
+        # optimize_onnx(
+        #     onnx_path=onnx_model_path,
+        #     onnx_optim_model_path=onnx_optim_model_path,
+        #     fp16=run_on_cuda,
+        #     use_cuda=run_on_cuda,
+        #     num_attention_heads=num_attention_heads,
+        #     hidden_size=hidden_size,
+        #     architecture=model_config.model_type,
+        # )
+        # if commands.device == "cpu" and commands.quantization:
+        #     cpu_quantization(input_model_path=onnx_optim_model_path, output_model_path=onnx_optim_model_path)
 
         ort_provider = "CUDAExecutionProvider" if run_on_cuda else "CPUExecutionProvider"
         for provider, model_path, benchmark_name in [
             (ort_provider, onnx_model_path, "ONNX Runtime (FP32)"),
-            (ort_provider, onnx_optim_model_path, "ONNX Runtime (optimized)"),
+            # (ort_provider, onnx_optim_model_path, "ONNX Runtime (optimized)"),
         ]:
             logging.info("preparing %s benchmark", benchmark_name)
             ort_model = create_model_for_provider(
