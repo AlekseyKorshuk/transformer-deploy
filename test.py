@@ -28,7 +28,9 @@ class InferenceSessionWithIOBinding(InferenceSession):
 
     def run(self, output_names, input_feed, run_options=None):
         results = inference_onnx_binding(model_onnx=self.ort_model, inputs=input_feed, device="cuda")
-        return results
+        logits = results["logits"]
+        output = logits.cpu().numpy()
+        return output
 
 
 model_path = "onnx-gpt2/model.onnx"
@@ -39,3 +41,7 @@ engine = InferenceSessionWithIOBinding(model_path=model_path, provider=provider,
 
 output2 = engine.run(None, {"input_ids": input_ids, "attention_mask": attention_mask})
 print(output2)
+
+model.model = engine
+
+model(**{"input_ids": input_ids, "attention_mask": attention_mask})
