@@ -71,6 +71,7 @@ for i in tqdm.tqdm(X):
     Y_onnx.append(duration)
     # onnx_outputs.append(output)
 
+del onnx_model
 del mixin.onnx_model
 del mixin
 
