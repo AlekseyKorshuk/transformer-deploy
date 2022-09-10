@@ -69,7 +69,7 @@ for i in tqdm.tqdm(X):
     output = mixin.generate(**inputs, **GENERATION_KWARGS)
     duration = time.time() - start_time
     Y_onnx.append(duration)
-    onnx_outputs.append(tokenizer.decode(output))
+    onnx_outputs.append(tokenizer.decode(output[0])[len(i):])
 
 del onnx_model
 del mixin.onnx_model
@@ -85,7 +85,7 @@ with torch.no_grad():
         output = torch_model.generate(**inputs, **GENERATION_KWARGS)
         duration = time.time() - start_time
         Y_torch.append(duration)
-        torch_outputs.append(tokenizer.decode(output))
+        torch_outputs.append(tokenizer.decode(output[0])[len(i):])
 
 # print(result)
 plt.plot(list(range(len(X))), Y_torch, label="torch")
