@@ -15,7 +15,7 @@ import time
 import matplotlib.pyplot as plt
 
 GENERATION_KWARGS = {
-    "max_new_tokens": 64,
+    "max_new_tokens": 1,
     # "min_new_tokens": 8,
     'eos_token_id': 198,
     'do_sample': False,
@@ -126,12 +126,16 @@ class ONNXWrapper(GenerationMixin):
     def __call__(self, inputs, past=None, **kwargs) -> CausalLMOutputWithPast:
 
         inputs["attention_mask"] = inputs["attention_mask"]  # .float()
-        print(to_pt(past))
-        outputs = inference_onnx_binding(model_onnx=self.session, inputs={**inputs, **to_pt(past)},
-                                         device="cuda")
-
-        # outputs = to_pt(
-        #     self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
+        # print(to_pt(past))
+        # try:
+        #     outputs = inference_onnx_binding(
+        #         model_onnx=self.session,
+        #         inputs={**inputs, **to_pt(past)},
+        #         device="cuda"
+        #     )
+        # except:
+        outputs = to_pt(
+            self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
 
         return CausalLMOutputWithPast(logits=outputs[0],
                                       past_key_values={k: v for k, v in zip(self.past_keys, outputs[1:])})
