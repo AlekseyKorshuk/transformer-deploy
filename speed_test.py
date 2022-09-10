@@ -85,8 +85,8 @@ class InferenceSessionWithIOBinding(InferenceSession):
             input_feed[key] = torch.tensor(input_feed[key], device=0)
         results = inference_onnx_binding(model_onnx=self.ort_model, inputs=input_feed, device="cuda")
         logits = results["logits"]
-        output = logits.cpu().numpy()
-        return [output]
+        # output = logits.cpu().numpy()
+        return logits
 
 
 model_path = "onnx-gpt2/model.onnx"
