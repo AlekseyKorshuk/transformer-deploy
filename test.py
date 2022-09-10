@@ -141,7 +141,7 @@ class ONNXWrapper(GenerationMixin):
             print(f"inference_onnx_binding: {time.time() - start_time}")
             logits = outputs.pop("logits")
             past_key_values = {k: v for k, v in zip(self.past_keys, outputs.values())}
-        elif True:
+        if True:
             print("-------")
             start_time = time.time()
             outputs = to_pt(
