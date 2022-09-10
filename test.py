@@ -4,11 +4,27 @@ from transformers.generation_utils import GenerationMixin
 import numpy as np
 import torch
 import numpy as np
-from transformers import AutoTokenizer, AutoConfig
+from transformers import AutoTokenizer, AutoConfig, AutoModelForCausalLM
 from onnxruntime import InferenceSession
 from typing import Dict
 from transformer_deploy.backends.ort_utils import create_model_for_provider, torch_to_numpy_dtype_dict, to_pytorch, \
     inference_onnx_binding
+from datasets import load_dataset
+import tqdm
+import time
+import matplotlib.pyplot as plt
+
+GENERATION_KWARGS = {
+    "max_new_tokens": 64,
+    # "min_new_tokens": 8,
+    'eos_token_id': 198,
+    'do_sample': False,
+    'pad_token_id': 198,
+    'temperature': 0.72,
+    'top_k': 0,
+    'top_p': 0.725,
+    'repetition_penalty': 1.13,
+}
 
 
 def to_numpy(x):
@@ -122,10 +138,44 @@ config = AutoConfig.from_pretrained(model_id)
 model = ONNXWrapper("onnx-lit-with-past/model.onnx", config)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
-text = "This is test message:"
-inputs = tokenizer(text, return_tensors="pt").to(0)
-# outputs = session.run(output_names=["logits", "past_key_values"], input_feed=dict(inputs))
+dataset = load_dataset("ChaiML/user_model_inputs")
 
-output_ids = model.generate(inputs["input_ids"], do_sample=True, top_p=0.9, max_new_tokens=32)
+X = dataset["train"]["text"][:10]
 
-print(tokenizer.decode(output_ids.squeeze(), skip_specail_tokens=True).strip())
+Y_onnx = []
+onnx_outputs = []
+for i in tqdm.tqdm(X):
+    inputs = tokenizer(i, return_tensors="pt").to(0)
+    start_time = time.time()
+    output = model.generate(**inputs, **GENERATION_KWARGS)
+    duration = time.time() - start_time
+    Y_onnx.append(duration)
+    onnx_outputs.append(tokenizer.decode(output[0])[len(i):])
+
+del model
+
+torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
+Y_torch = []
+torch_outputs = []
+with torch.no_grad():
+    for i in tqdm.tqdm(X):
+        inputs = tokenizer(i, return_tensors="pt").to(0)
+        start_time = time.time()
+        output = torch_model.generate(**inputs, **GENERATION_KWARGS)
+        duration = time.time() - start_time
+        Y_torch.append(duration)
+        torch_outputs.append(tokenizer.decode(output[0])[len(i):])
+
+# print(result)
+plt.plot(list(range(len(X))), Y_torch, label="torch")
+plt.plot(list(range(len(X))), Y_onnx, label="onnx")
+plt.legend()
+
+plt.savefig('plot.png')
+plt.show()
+
+for torch, onnx in zip(torch_outputs, onnx_outputs):
+    print(torch)
+    print("-" * 100)
+    print(onnx)
+    print("#" * 100)
