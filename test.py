@@ -13,6 +13,7 @@ from datasets import load_dataset
 import tqdm
 import time
 import matplotlib.pyplot as plt
+import pandas as pd
 
 GENERATION_KWARGS = {
     "max_new_tokens": 64,
@@ -196,6 +197,13 @@ plt.legend()
 plt.savefig('plot.png')
 plt.show()
 
+Y_torch = np.array(Y_torch)
+Y_onnx = np.array(Y_onnx)
+print(f"Torch mean: {Y_torch.mean()}")
+print(f"Onnx mean: {Y_onnx.mean()}")
+df = pd.DataFrame({"torch": Y_torch, "onnx": Y_onnx})
+
+print(df.describe())
 # for torch, onnx in zip(torch_outputs, onnx_outputs):
 #     print(torch)
 #     print("-" * 100)
