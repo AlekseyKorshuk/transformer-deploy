@@ -18,8 +18,8 @@ from transformer_deploy.backends.ort_utils import create_model_for_provider, tor
     inference_onnx_binding
 
 config = AutoConfig.from_pretrained("gpt2")
-tokenizer = AutoTokenizer.from_pretrained("gpt2").to(0)
-inputs = tokenizer("Hello,", return_tensors="pt")
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+inputs = tokenizer("Hello,", return_tensors="pt").to(0)
 model = AutoModelForCausalLM.from_config(config).to(0)
 
 
