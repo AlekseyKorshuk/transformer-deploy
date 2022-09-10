@@ -9,6 +9,7 @@ from transformer_deploy.backends.ort_utils import create_model_for_provider, tor
 from datasets import load_dataset
 import tqdm
 import time
+import matplotlib.pyplot as plt
 
 GENERATION_KWARGS = {
     "max_new_tokens": 32,
@@ -56,7 +57,6 @@ mixin = GenerationMixin(
     onnx_model=onnx_model
 )
 
-
 dataset = load_dataset("ChaiML/user_model_inputs")
 
 X = dataset["train"]["text"][:10]
@@ -71,4 +71,22 @@ for i in tqdm.tqdm(X):
     Y_onnx.append(duration)
     onnx_outputs.append(output)
 
+torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
+Y_torch = []
+torch_outputs = []
+with torch.no_grad():
+    for i in tqdm.tqdm(X):
+        inputs = tokenizer(i, return_tensors="pt").to(0)
+        start_time = time.time()
+        result = torch_model(**inputs, **GENERATION_KWARGS)
+        duration = time.time() - start_time
+        Y_torch.append(duration)
+        torch_outputs.append(result)
+
 # print(result)
+plt.plot(list(range(len(X))), Y_torch, label="torch")
+plt.plot(list(range(len(X))), Y_onnx, label="onnx")
+plt.legend()
+
+plt.savefig('plot.png')
+plt.show()
