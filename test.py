@@ -147,7 +147,7 @@ class ONNXWrapper(GenerationMixin):
             logits = outputs[0]
             past_key_values = {k: v for k, v in zip(self.past_keys, outputs[1:])}
         end_time = time.time()
-        print(end_time)
+        print(end_time - start_time)
 
         return CausalLMOutputWithPast(
             logits=logits,
