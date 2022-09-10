@@ -45,7 +45,7 @@ class InferenceSessionWithIOBinding(InferenceSession):
         return logits
 
 
-model_path = "onnx-gpt2/model.onnx"
+model_path = "onnx-lit/model.onnx"
 provider = "CUDAExecutionProvider"
 nb_threads = 1
 
