@@ -50,20 +50,6 @@ dataset = load_dataset("ChaiML/user_model_inputs")
 
 X = dataset["train"]["text"][:10]
 
-torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
-Y_torch = []
-torch_outputs = []
-with torch.no_grad():
-    for i in tqdm.tqdm(X):
-        inputs = tokenizer(i, return_tensors="pt").to(0)
-        start_time = time.time()
-        result = torch_model.generate(**inputs, **GENERATION_KWARGS)
-        duration = time.time() - start_time
-        Y_torch.append(duration)
-        torch_outputs.append(result)
-torch_model.to("cpu")
-del torch_model
-
 model_path = "onnx-lit/model.onnx"
 provider = "CUDAExecutionProvider"
 nb_threads = 1
@@ -83,7 +69,22 @@ for i in tqdm.tqdm(X):
     output = mixin.generate(**inputs, **GENERATION_KWARGS)
     duration = time.time() - start_time
     Y_onnx.append(duration)
-    onnx_outputs.append(output)
+    # onnx_outputs.append(output)
+
+del mixin.onnx_model
+del mixin
+
+torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
+Y_torch = []
+torch_outputs = []
+with torch.no_grad():
+    for i in tqdm.tqdm(X):
+        inputs = tokenizer(i, return_tensors="pt").to(0)
+        start_time = time.time()
+        result = torch_model.generate(**inputs, **GENERATION_KWARGS)
+        duration = time.time() - start_time
+        Y_torch.append(duration)
+        # torch_outputs.append(result)
 
 # print(result)
 plt.plot(list(range(len(X))), Y_torch, label="torch")
