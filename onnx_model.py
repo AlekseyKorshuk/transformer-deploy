@@ -18,4 +18,4 @@ model = OnnxModel.from_pretrained("gpt2")
 
 output = model(**inputs)
 
-print(output)
+# print(output)
