@@ -40,7 +40,6 @@ from onnxruntime.transformers.onnx_model import OnnxModel
 from onnxruntime.transformers.onnx_model_bert import BertOnnxModel
 from onnxruntime.transformers.optimizer import MODEL_TYPES
 
-
 libc = C.CDLL(find_library("c"))
 libc.malloc.restype = C.c_void_p
 
@@ -53,12 +52,12 @@ except ImportError:
 
 
 def create_model_for_provider(
-    path: str,
-    provider_to_use: Union[str, List],
-    nb_threads: int = 0,
-    optimization_level: GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_EXTENDED,
-    enable_profiling: bool = False,
-    log_severity: int = 2,
+        path: str,
+        provider_to_use: Union[str, List],
+        nb_threads: int = 0,
+        optimization_level: GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_EXTENDED,
+        enable_profiling: bool = False,
+        log_severity: int = 2,
 ) -> InferenceSession:
     """
     Create an ONNX Runtime instance.
@@ -86,13 +85,13 @@ def create_model_for_provider(
 
 
 def optimize_onnx(
-    onnx_path: str,
-    onnx_optim_model_path: str,
-    fp16: bool,
-    use_cuda: bool,
-    num_attention_heads: int = 0,
-    hidden_size: int = 0,
-    architecture: str = "bert",
+        onnx_path: str,
+        onnx_optim_model_path: str,
+        fp16: bool,
+        use_cuda: bool,
+        num_attention_heads: int = 0,
+        hidden_size: int = 0,
+        architecture: str = "bert",
 ) -> None:
     """
     ONNX Runtime transformer graph optimization.
@@ -228,12 +227,13 @@ def to_pytorch(ort_tensor: OrtValue, clone_tensor: bool) -> torch.Tensor:
 
 
 def inference_onnx_binding(
-    model_onnx: InferenceSession,
-    inputs: Dict[str, torch.Tensor],
-    device: str,
-    device_id: int = 0,
-    binding: Optional[IOBinding] = None,
-    clone_tensor: bool = True,
+        model_onnx: InferenceSession,
+        inputs: Dict[str, torch.Tensor],
+        device: str,
+        device_id: int = 0,
+        binding: Optional[IOBinding] = None,
+        clone_tensor: bool = True,
+        output_names=None
 ) -> Dict[str, torch.Tensor]:
     """
     Performs inference on ONNX Runtime in an optimized way.
@@ -253,6 +253,8 @@ def inference_onnx_binding(
     """
     assert isinstance(device, str)
     assert device in ["cpu", "cuda"], f"unexpected inference device: '{device}'"
+    if output_names is None:
+        output_names = [out.name for out in model_onnx.get_outputs()]
     if binding is None:
         binding: IOBinding = model_onnx.io_binding()
     else:
@@ -277,9 +279,9 @@ def inference_onnx_binding(
         )
         inputs[input_onnx.name] = tensor
 
-    for out in model_onnx.get_outputs():
+    for out in output_names:
         binding.bind_output(
-            name=out.name,
+            name=out,
             device_type=device,
             device_id=device_id,
         )
@@ -289,9 +291,9 @@ def inference_onnx_binding(
     outputs = dict()
     assert len(model_onnx.get_outputs()) == len(
         binding.get_outputs()
-    ), f"{len(model_onnx.get_outputs())} != {len(binding.get_outputs())}"
-    for out, t in zip(model_onnx.get_outputs(), binding.get_outputs()):
-        outputs[out.name] = to_pytorch(t, clone_tensor=clone_tensor)
+    ), f"{len(output_names)} != {len(binding.get_outputs())}"
+    for out, t in zip(output_names, binding.get_outputs()):
+        outputs[out] = to_pytorch(t, clone_tensor=clone_tensor)
     return outputs
 
 
@@ -329,10 +331,10 @@ def find_node_fp32(graph: Dict[str, str], output_nodes: Dict[str, torch.Tensor])
             continue
         # out of FP16 range
         if (
-            torch.any(tensor > max_float16)
-            or torch.any(tensor < min_float16)
-            # limited memory footprint check
-            or (torch.any((tensor < resolution) & (tensor > -resolution) & (tensor != 0)))
+                torch.any(tensor > max_float16)
+                or torch.any(tensor < min_float16)
+                # limited memory footprint check
+                or (torch.any((tensor < resolution) & (tensor > -resolution) & (tensor != 0)))
         ):
             keep_fp32.append(graph[k])
     return keep_fp32
@@ -375,10 +377,10 @@ def get_io_to_node_mapping(onnx_model: ModelProto) -> Tuple[Dict[str, str], Dict
 
 
 def search_fp32_nodes(
-    original_model: str,
-    modified_model_session: InferenceSession,
-    get_input: Callable[[], Dict[str, torch.Tensor]],
-    early_stop: int,
+        original_model: str,
+        modified_model_session: InferenceSession,
+        get_input: Callable[[], Dict[str, torch.Tensor]],
+        early_stop: int,
 ) -> List[str]:
     """
     Find the list of nodes to keep in FP32 to avoid out of range values/rounding to zero.
@@ -412,9 +414,9 @@ def search_fp32_nodes(
     torch.cuda.empty_cache()
     # I/O names that can't be found in the graph
     nodes_to_skip = (
-        [n.name for n in onnx_model.graph.input]
-        + [n.name for n in onnx_model.graph.output]
-        + [n.name for n in onnx_model.graph.initializer]
+            [n.name for n in onnx_model.graph.input]
+            + [n.name for n in onnx_model.graph.output]
+            + [n.name for n in onnx_model.graph.initializer]
     )
 
     # for each node to keep in FP32, we keep its children in FP32 too as they will receive FP32 values as input
@@ -430,7 +432,7 @@ def search_fp32_nodes(
 
 
 def get_keep_fp32_nodes(
-    onnx_model_path: str, get_input: Callable[[], Dict[str, torch.Tensor]], early_stop: int = 100
+        onnx_model_path: str, get_input: Callable[[], Dict[str, torch.Tensor]], early_stop: int = 100
 ) -> List[str]:
     """
     Find the list of nodes to keep in FP32 to avoid out of range values

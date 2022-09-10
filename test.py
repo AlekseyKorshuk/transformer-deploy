@@ -131,7 +131,8 @@ class ONNXWrapper(GenerationMixin):
             outputs = inference_onnx_binding(
                 model_onnx=self.session,
                 inputs={**inputs, **to_pt(past)},
-                device="cuda"
+                device="cuda",
+                output_names=self.output_names
             )
             logits = outputs.pop("logits")
             past_key_values = outputs
