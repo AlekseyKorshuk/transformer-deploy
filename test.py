@@ -11,21 +11,6 @@ from transformer_deploy.backends.ort_utils import create_model_for_provider, tor
     inference_onnx_binding
 
 
-class DummySession:
-    def __init__(self) -> None:
-        pass
-
-    def run(self, output_names, input_feed):
-        input_shape = input_feed["input_ids"].shape
-        bs, nh, sl, d = input_feed["past_key_values.0.key"].shape
-        for v in input_feed.values():
-            assert isinstance(v, np.ndarray)
-        logit_shape = input_shape + (10,)
-        fake_logits = np.random.randn(*logit_shape)
-        fake_past = [np.random.randn(bs, nh, sl + 1, d) for i in range(len(input_feed) - 2)]
-        return [fake_logits] + fake_past
-
-
 def to_numpy(x):
     if isinstance(x, np.ndarray):
         return x
@@ -132,9 +117,9 @@ class ONNXWrapper(GenerationMixin):
                                       past_key_values={k: v for k, v in zip(self.past_keys, outputs[1:])})
 
 
-model_id = "gpt2"
+model_id = "hakurei/litv2-6B-rev2"
 config = AutoConfig.from_pretrained(model_id)
-model = ONNXWrapper("onnx-gpt2-past/model.onnx", config)
+model = ONNXWrapper("onnx-lit-with-past/model.onnx", config)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 text = "This is test message:"
