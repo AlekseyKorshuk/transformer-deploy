@@ -14,7 +14,7 @@ class OnnxModel(AutoModelForCausalLM):
 
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
 inputs = tokenizer("Hello,", return_tensors="pt")
-model = OnnxModel.from_pretrained("gpt2")
+model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2")
 
 print(type(model))
 output = model(**inputs)
