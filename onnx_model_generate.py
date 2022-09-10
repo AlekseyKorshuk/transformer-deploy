@@ -1,21 +1,23 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 from generation_mixin import GenerationMixin
-import torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline, AutoModelForCausalLM
-from transformers import pipeline
-import tqdm
-from datasets import load_dataset
-import warnings
-from typing import Dict, Optional
-
-from optimum.onnxruntime import ORTModelForCausalLM
 from transformers import pipeline, AutoTokenizer
 import torch
 from onnxruntime import ExecutionMode, GraphOptimizationLevel, InferenceSession, IOBinding, OrtValue, SessionOptions
-
-# model = ORTModelForCausalLM.from_pretrained(save_directory, file_name="model-quantized.onnx")
 from transformer_deploy.backends.ort_utils import create_model_for_provider, torch_to_numpy_dtype_dict, to_pytorch, \
     inference_onnx_binding
+
+GENERATION_KWARGS = {
+    "max_new_tokens": 32,
+    # "min_new_tokens": 8,
+    'eos_token_id': 198,
+    'do_sample': True,
+    'pad_token_id': 198,
+    'temperature': 0.72,
+    'top_k': 0,
+    'top_p': 0.725,
+    'repetition_penalty': 1.13,
+}
 
 config = AutoConfig.from_pretrained("gpt2")
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
@@ -51,6 +53,6 @@ mixin = GenerationMixin(
     onnx_model=onnx_model
 )
 print(type(model))
-output = mixin.generate(**inputs)
+output = mixin.generate(**inputs, **GENERATION_KWARGS)
 
 print(output)
