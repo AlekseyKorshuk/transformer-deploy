@@ -41,7 +41,7 @@ def to_pt(x):
     if isinstance(x, torch.Tensor):
         return x
     if isinstance(x, np.ndarray):
-        return torch.tensor(x)
+        return torch.tensor(x).to(0)
     if isinstance(x, list):
         return [to_pt(e) for e in x]
     if isinstance(x, dict):
