@@ -16,6 +16,7 @@ tokenizer = AutoTokenizer.from_pretrained("gpt2")
 inputs = tokenizer("Hello,", return_tensors="pt")
 model = OnnxModel.from_pretrained("gpt2")
 
+print(type(model))
 output = model(**inputs)
 
 # print(output)
