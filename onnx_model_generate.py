@@ -6,6 +6,9 @@ import torch
 from onnxruntime import ExecutionMode, GraphOptimizationLevel, InferenceSession, IOBinding, OrtValue, SessionOptions
 from transformer_deploy.backends.ort_utils import create_model_for_provider, torch_to_numpy_dtype_dict, to_pytorch, \
     inference_onnx_binding
+from datasets import load_dataset
+import tqdm
+import time
 
 GENERATION_KWARGS = {
     "max_new_tokens": 32,
@@ -52,7 +55,21 @@ mixin = GenerationMixin(
     model=model,
     onnx_model=onnx_model
 )
-print(type(model))
-output = mixin.generate(**inputs, **GENERATION_KWARGS)
 
 print(output)
+
+dataset = load_dataset("ChaiML/user_model_inputs")
+
+X = dataset["train"]["text"][:10]
+
+Y_onnx = []
+onnx_outputs = []
+for i in tqdm.tqdm(X):
+    inputs = tokenizer(i, return_tensors="pt").to(0)
+    start_time = time.time()
+    output = mixin.generate(**inputs, **GENERATION_KWARGS)
+    duration = time.time() - start_time
+    Y_onnx.append(duration)
+    onnx_outputs.append(output)
+
+# print(result)
