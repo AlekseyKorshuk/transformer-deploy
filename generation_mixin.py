@@ -1793,8 +1793,8 @@ class GenerationMixin:
                     "attention_mask": model_inputs["attention_mask"].cpu().detach().numpy()
                 }
                 outputs = CausalLMOutputWithCrossAttentions(
-                    logits=torch.tensor(self.onnx_model.run(None, inputs_onnx)[0]))
-            else:
+                    logits=self.onnx_model.run(None, inputs_onnx)
+                else:
                 outputs = self.model(
                     **model_inputs,
                     return_dict=True,
@@ -1802,8 +1802,8 @@ class GenerationMixin:
                     output_hidden_states=output_hidden_states,
                 )
 
-            if synced_gpus and this_peer_finished:
-                cur_len = cur_len + 1
+                if synced_gpus and this_peer_finished:
+                    cur_len = cur_len + 1
                 continue  # don't waste resources running the code we don't need
 
             next_token_logits = outputs.logits[:, -1, :]
@@ -2065,7 +2065,7 @@ class GenerationMixin:
                     "attention_mask": model_inputs["attention_mask"].cpu().detach().numpy()
                 }
                 outputs = CausalLMOutputWithCrossAttentions(
-                    logits=torch.tensor(self.onnx_model.run(None, inputs_onnx)[0]))
+                    logits=self.onnx_model.run(None, inputs_onnx))
             else:
                 outputs = self.model(
                     **model_inputs,
@@ -2388,7 +2388,7 @@ class GenerationMixin:
                     "attention_mask": model_inputs["attention_mask"].cpu().detach().numpy()
                 }
                 outputs = CausalLMOutputWithCrossAttentions(
-                    logits=torch.tensor(self.onnx_model.run(None, inputs_onnx)[0]))
+                    logits=self.onnx_model.run(None, inputs_onnx))
             else:
                 outputs = self.model(
                     **model_inputs,
@@ -2729,7 +2729,7 @@ class GenerationMixin:
                     "attention_mask": model_inputs["attention_mask"].cpu().detach().numpy()
                 }
                 outputs = CausalLMOutputWithCrossAttentions(
-                    logits=torch.tensor(self.onnx_model.run(None, inputs_onnx)[0]))
+                    logits=self.onnx_model.run(None, inputs_onnx))
             else:
                 outputs = self.model(
                     **model_inputs,
@@ -3092,7 +3092,7 @@ class GenerationMixin:
                     "attention_mask": model_inputs["attention_mask"].cpu().detach().numpy()
                 }
                 outputs = CausalLMOutputWithCrossAttentions(
-                    logits=torch.tensor(self.onnx_model.run(None, inputs_onnx)[0]))
+                    logits=self.onnx_model.run(None, inputs_onnx))
             else:
                 outputs = self.model(
                     **model_inputs,
