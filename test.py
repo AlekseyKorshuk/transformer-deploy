@@ -7,6 +7,8 @@ import numpy as np
 from transformers import AutoTokenizer, AutoConfig
 from onnxruntime import InferenceSession
 from typing import Dict
+from transformer_deploy.backends.ort_utils import create_model_for_provider, torch_to_numpy_dtype_dict, to_pytorch, \
+    inference_onnx_binding
 
 
 class DummySession:
@@ -49,8 +51,12 @@ def to_pt(x):
 class ONNXWrapper(GenerationMixin):
     "Wrapps ONNX `InferenceSession` to enable generation using GenerationMixin"
 
-    def __init__(self, onnx_model, config, device="cpu") -> None:
-        self.session = InferenceSession(onnx_model)
+    def __init__(self, onnx_model, config, device="cuda") -> None:
+        self.session = create_model_for_provider(
+            onnx_model,
+            provider_to_use="CUDAExecutionProvider",
+            nb_threads=1
+        )
         self.config = config
         self.main_input_name = "input_ids"
         self.device = torch.device(device)
@@ -132,7 +138,7 @@ model = ONNXWrapper(" onnx-gpt2-past/model.onnx", config)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 text = "This is test message:"
-inputs = tokenizer(text, return_tensors="pt")
+inputs = tokenizer(text, return_tensors="pt").to(0)
 # outputs = session.run(output_names=["logits", "past_key_values"], input_feed=dict(inputs))
 
 output_ids = model.generate(inputs["input_ids"], do_sample=True, top_p=0.9, max_new_tokens=32)
