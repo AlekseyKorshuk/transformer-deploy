@@ -6,7 +6,7 @@ class OnnxModel(AutoModelForCausalLM):
     # def __init__(self):
     #     pass
 
-    def _forward(self, **args):
+    def forward(self, **args):
         print(args)
         return None
 
