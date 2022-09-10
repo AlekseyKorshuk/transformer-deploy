@@ -1,82 +1,140 @@
-from typing import Dict, Optional
-
-from optimum.onnxruntime import ORTModelForCausalLM
-from transformers import pipeline, AutoTokenizer
 import torch
-from onnxruntime import ExecutionMode, GraphOptimizationLevel, InferenceSession, IOBinding, OrtValue, SessionOptions
-
-# model = ORTModelForCausalLM.from_pretrained(save_directory, file_name="model-quantized.onnx")
-from transformer_deploy.backends.ort_utils import create_model_for_provider, torch_to_numpy_dtype_dict, to_pytorch, inference_onnx_binding
-
-GENERATION_KWARGS = {
-    "max_new_tokens": 64,
-    'eos_token_id': 198,
-    'do_sample': False,
-    'pad_token_id': 198,
-    'temperature': 0.72,
-    'top_k': 0,
-    'top_p': 0.725,
-    'repetition_penalty': 1.13,
-}
-
-tokenizer = AutoTokenizer.from_pretrained("gpt2")
-model = ORTModelForCausalLM.from_pretrained("gpt2", from_transformers=True)
-model.to(torch.device("cuda"))
-
-input_ids = torch.tensor([[1] * 10] * 1, dtype=torch.int64).to(0)
-attention_mask = torch.tensor([[1] * 10] * 1, dtype=torch.int64).to(0)
-
-output1 = model.model.run(None, {"input_ids": input_ids.cpu().detach().numpy(),
-                                 "attention_mask": attention_mask.cpu().detach().numpy()})
-print(output1)
-print("#" * 100)
-
-input_ids = torch.tensor([[1] * 10] * 1, dtype=torch.int64).to(0)
-attention_mask = torch.tensor([[1] * 10] * 1, dtype=torch.int64).to(0)
-
-output1 = model(input_ids=input_ids, attention_mask=attention_mask)
-print(output1)
-print("#" * 100)
+from transformers.modeling_outputs import CausalLMOutputWithPast
+from transformers.generation_utils import GenerationMixin
+import numpy as np
+import torch
+import numpy as np
+from transformers import AutoTokenizer, AutoConfig
+from onnxruntime import InferenceSession
+from typing import Dict
 
 
+class DummySession:
+    def __init__(self) -> None:
+        pass
+
+    def run(self, output_names, input_feed):
+        input_shape = input_feed["input_ids"].shape
+        bs, nh, sl, d = input_feed["past_key_values.0.key"].shape
+        for v in input_feed.values():
+            assert isinstance(v, np.ndarray)
+        logit_shape = input_shape + (10,)
+        fake_logits = np.random.randn(*logit_shape)
+        fake_past = [np.random.randn(bs, nh, sl + 1, d) for i in range(len(input_feed) - 2)]
+        return [fake_logits] + fake_past
 
 
-class InferenceSessionWithIOBinding(InferenceSession):
-    def __init__(self, model_path, provider, nb_threads=1):
-        self.ort_model = create_model_for_provider(
-            path=model_path,
-            provider_to_use=provider,
-            nb_threads=nb_threads,
-        )
-
-    def run(self, output_names, input_feed, run_options=None):
-        for key in input_feed.keys():
-            input_feed[key] = torch.tensor(input_feed[key], device=0)
-        results = inference_onnx_binding(model_onnx=self.ort_model, inputs=input_feed, device="cuda")
-        logits = results["logits"]
-        output = logits.cpu().numpy()
-        return [output]
+def to_numpy(x):
+    if isinstance(x, np.ndarray):
+        return x
+    if isinstance(x, torch.Tensor):
+        return x.cpu().numpy()
+    if isinstance(x, list):
+        return [to_numpy(e) for e in x]
+    if isinstance(x, dict):
+        return {k: to_numpy(v) for k, v in x.items()}
 
 
-model_path = "onnx-gpt2/model.onnx"
-provider = "CUDAExecutionProvider"
-nb_threads = 1
+def to_pt(x):
+    if isinstance(x, torch.Tensor):
+        return x
+    if isinstance(x, np.ndarray):
+        return torch.tensor(x)
+    if isinstance(x, list):
+        return [to_pt(e) for e in x]
+    if isinstance(x, dict):
+        return {k: to_pt(v) for k, v in x.items()}
 
-engine = InferenceSessionWithIOBinding(model_path=model_path, provider=provider, nb_threads=nb_threads)
 
-output2 = engine.run(None, {"input_ids": input_ids, "attention_mask": attention_mask})
-print(output2)
-print("#" * 100)
+class ONNXWrapper(GenerationMixin):
+    "Wrapps ONNX `InferenceSession` to enable generation using GenerationMixin"
 
-model.model = engine
+    def __init__(self, onnx_model, config, device="cpu") -> None:
+        self.session = InferenceSession(onnx_model)
+        self.config = config
+        self.main_input_name = "input_ids"
+        self.device = torch.device(device)
+        # TODO: check config
+        self.output_names = ["logits"] + [f"present.{i // 2}.{'key' if i % 2 == 0 else 'value'}" for i in
+                                          range(self.config.n_layer * 2)]
+        self.past_keys = [f"past_key_values.{i // 2}.{'key' if i % 2 == 0 else 'value'}" for i in
+                          range(config.n_layer * 2)]
 
-result = model(**{"input_ids": input_ids, "attention_mask": attention_mask})
+    def forward(input_ids, attention_mask, past_key_values):
+        # dummy method for compatibility
+        pass
 
-print(result)
-print("#" * 100)
+    def get_empty_past(self, input_ids, config):
+        batch_size = input_ids.shape[0]
+        past_shape = [batch_size, config.n_head, 0, config.n_embd // config.n_head]
+        empty_past = {k: np.empty(past_shape, np.float32) for k in self.past_keys}
+        return empty_past
 
-inputs = tokenizer("Hello,", return_tensors="pt").to(0)
-result = model.generate(**inputs, **GENERATION_KWARGS)
-# pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, device=0)
-# result = pipe("Hello,")
-print(result)
+    def prepare_inputs_for_generation(self, input_ids, past=None, **kwargs):
+        if past is not None:
+            input_ids = input_ids[:, -1:]
+        else:
+            past = self.get_empty_past(input_ids, self.config)
+
+        attention_mask = kwargs.get("attention_mask", None)
+        position_ids = kwargs.get("position_ids", None)
+        if attention_mask is not None and position_ids is None:
+            # create position_ids on the fly for batch generation
+            position_ids = attention_mask.long().cumsum(-1) - 1
+            position_ids.masked_fill_(attention_mask == 0, 1)
+            if past:
+                position_ids = position_ids[:, -1:]
+        else:
+            position_ids = None
+        # position_ids not used by ONNX model
+        return {
+            "inputs": {
+                "input_ids": input_ids,
+                "attention_mask": attention_mask
+            },
+            "past": past
+        }
+
+    @staticmethod
+    def _update_model_kwargs_for_generation(outputs, model_kwargs, is_encoder_decoder):
+        # update past
+        if "past_key_values" in outputs:
+            model_kwargs["past"] = outputs.past_key_values
+        else:
+            model_kwargs["past"] = None
+
+        # update token_type_ids with last value
+        if "token_type_ids" in model_kwargs:
+            token_type_ids = model_kwargs["token_type_ids"]
+            model_kwargs["token_type_ids"] = torch.cat([token_type_ids, token_type_ids[:, -1].unsqueeze(-1)], dim=-1)
+
+        # update attention mask
+        if "attention_mask" in model_kwargs:
+            attention_mask = model_kwargs["attention_mask"]
+            model_kwargs["attention_mask"] = torch.cat(
+                [attention_mask, attention_mask.new_ones((attention_mask.shape[0], 1))], dim=-1
+            )
+        return model_kwargs
+
+    def __call__(self, inputs, past=None, **kwargs) -> CausalLMOutputWithPast:
+
+        inputs["attention_mask"] = inputs["attention_mask"]  # .float()
+        outputs = to_pt(
+            self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
+
+        return CausalLMOutputWithPast(logits=outputs[0],
+                                      past_key_values={k: v for k, v in zip(self.past_keys, outputs[1:])})
+
+
+model_id = "gpt2"
+config = AutoConfig.from_pretrained(model_id)
+model = ONNXWrapper(" onnx-gpt2-past/model.onnx", config)
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+text = "This is test message:"
+inputs = tokenizer(text, return_tensors="pt")
+# outputs = session.run(output_names=["logits", "past_key_values"], input_feed=dict(inputs))
+
+output_ids = model.generate(inputs["input_ids"], do_sample=True, top_p=0.9, max_new_tokens=32)
+
+print(tokenizer.decode(output_ids.squeeze(), skip_specail_tokens=True).strip())

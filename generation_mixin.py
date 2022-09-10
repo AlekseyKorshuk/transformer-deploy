@@ -1793,7 +1793,8 @@ class GenerationMixin:
                     "attention_mask": model_inputs["attention_mask"].cpu().detach().numpy()
                 }
                 outputs = CausalLMOutputWithCrossAttentions(
-                    logits=self.onnx_model.run(None, inputs_onnx))
+                    logits=self.onnx_model.run(None, inputs_onnx)
+                )
             else:
                 outputs = self.model(
                     **model_inputs,
