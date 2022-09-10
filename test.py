@@ -127,15 +127,18 @@ class ONNXWrapper(GenerationMixin):
 
         inputs["attention_mask"] = inputs["attention_mask"]  # .float()
         # print(to_pt(past))
-        # try:
-        #     outputs = inference_onnx_binding(
-        #         model_onnx=self.session,
-        #         inputs={**inputs, **to_pt(past)},
-        #         device="cuda"
-        #     )
-        # except:
-        outputs = to_pt(
-            self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
+        try:
+            outputs = inference_onnx_binding(
+                model_onnx=self.session,
+                inputs={**inputs, **to_pt(past)},
+                device="cuda"
+            )
+            print("DONE")
+            print(outputs)
+        except Exception as ex:
+            print(ex)
+            outputs = to_pt(
+                self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
 
         return CausalLMOutputWithPast(logits=outputs[0],
                                       past_key_values={k: v for k, v in zip(self.past_keys, outputs[1:])})
