@@ -163,7 +163,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 dataset = load_dataset("ChaiML/user_model_inputs")
 
-X = dataset["train"]["text"][:1000]
+X = dataset["train"]["text"][:100]
 
 Y_onnx = []
 onnx_outputs = []
