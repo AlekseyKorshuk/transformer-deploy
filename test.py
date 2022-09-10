@@ -127,9 +127,9 @@ class ONNXWrapper(GenerationMixin):
 
         inputs["attention_mask"] = inputs["attention_mask"]  # .float()
         # print(to_pt(past))
-        print(past)
-        print(list(past.values())[0][0])
-        print(len(list(past.values())[0][0]))
+        element = past[list(past.keys())[0]]
+        print(element)
+        print(len(element))
         if len(list(past.values())[0][0]) != 0:
             outputs = inference_onnx_binding(
                 model_onnx=self.session,
