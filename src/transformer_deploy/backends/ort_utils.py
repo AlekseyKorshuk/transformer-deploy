@@ -275,7 +275,7 @@ def inference_onnx_binding(
             tensor.cpu().numpy(),
             'cuda', 0
         )
-        binding.bind_ortvalue_input('input_onnx.name', ortvalue)
+        binding.bind_ortvalue_input(input_onnx.name, ortvalue)
         # binding.bind_input(
         #     name=input_onnx.name,
         #     device_type=device,
