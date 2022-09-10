@@ -126,9 +126,10 @@ class ONNXWrapper(GenerationMixin):
     def __call__(self, inputs, past=None, **kwargs) -> CausalLMOutputWithPast:
 
         inputs["attention_mask"] = inputs["attention_mask"]  # .float()
-        
+
         element = past[list(past.keys())[0]]
 
+        print(f"PAST AS INPUT: {past.keys()}")
         if element.shape[2] != 0:
             outputs = inference_onnx_binding(
                 model_onnx=self.session,
