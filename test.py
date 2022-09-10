@@ -16,7 +16,6 @@ import matplotlib.pyplot as plt
 
 GENERATION_KWARGS = {
     "max_new_tokens": 64,
-    # "min_new_tokens": 8,
     'eos_token_id': 198,
     'do_sample': False,
     'pad_token_id': 198,
@@ -150,7 +149,6 @@ class ONNXWrapper(GenerationMixin):
             logits = outputs[0]
             past_key_values = {k: v for k, v in zip(self.past_keys, outputs[1:])}
 
-
         return CausalLMOutputWithPast(
             logits=logits,
             past_key_values=past_key_values
@@ -164,7 +162,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 dataset = load_dataset("ChaiML/user_model_inputs")
 
-X = dataset["train"]["text"][:10]
+X = dataset["train"]["text"][:1000]
 
 Y_onnx = []
 onnx_outputs = []
