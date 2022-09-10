@@ -134,7 +134,7 @@ class ONNXWrapper(GenerationMixin):
 
 model_id = "gpt2"
 config = AutoConfig.from_pretrained(model_id)
-model = ONNXWrapper(" onnx-gpt2-past/model.onnx", config)
+model = ONNXWrapper("onnx-gpt2-past/model.onnx", config)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 text = "This is test message:"
