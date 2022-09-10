@@ -270,16 +270,20 @@ def inference_onnx_binding(
         #     tensor = tensor.type(dtype=torch.int32)
         tensor = tensor.contiguous()
         print(f"pointer to {input_onnx.name}: {tensor.data_ptr()}")
-        if tensor.data_ptr() == 0:
-            continue
-        binding.bind_input(
-            name=input_onnx.name,
-            device_type=device,
-            device_id=device_id,
-            element_type=torch_to_numpy_dtype_dict[tensor.dtype],
-            shape=tuple(tensor.shape),
-            buffer_ptr=tensor.data_ptr(),
+
+        ortvalue = OrtValue.ortvalue_from_numpy(
+            tensor.cpu().numpy(),
+            'cuda', 0
         )
+        binding.bind_ortvalue_input('input_onnx.name', ortvalue)
+        # binding.bind_input(
+        #     name=input_onnx.name,
+        #     device_type=device,
+        #     device_id=device_id,
+        #     element_type=torch_to_numpy_dtype_dict[tensor.dtype],
+        #     shape=tuple(tensor.shape),
+        #     buffer_ptr=tensor.data_ptr(),
+        # )
         inputs[input_onnx.name] = tensor
 
     for out in output_names:
