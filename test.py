@@ -133,15 +133,21 @@ class ONNXWrapper(GenerationMixin):
                 inputs={**inputs, **to_pt(past)},
                 device="cuda"
             )
+            logits = outputs.pop("logits")
+            past_key_values = outputs
             print("DONE")
-            print(outputs)
+            # print(outputs)
         except Exception as ex:
-            print(ex)
+            # print(ex)
             outputs = to_pt(
                 self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
+            logits = outputs[0]
+            past_key_values = {k: v for k, v in zip(self.past_keys, outputs[1:])}
 
-        return CausalLMOutputWithPast(logits=outputs[0],
-                                      past_key_values={k: v for k, v in zip(self.past_keys, outputs[1:])})
+        return CausalLMOutputWithPast(
+            logits=logits,
+            past_key_values=past_key_values
+        )
 
 
 model_id = "hakurei/litv2-6B-rev2"
