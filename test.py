@@ -142,7 +142,7 @@ class ONNXWrapper(GenerationMixin):
             logits = outputs.pop("logits")
             past_key_values = {k: v for k, v in zip(self.past_keys, outputs.values())}
         if True:
-            print("-------")
+            # print("-------")
             start_time = time.time()
             outputs = to_pt(
                 self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
