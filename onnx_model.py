@@ -1,22 +1,14 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
+from generation_mixin import GenerationMixin
 
-
-class OnnxModel(AutoModelForCausalLM):
-
-    # def __init__(self):
-    #     pass
-
-    def __call__(self, *args, **kwargs):
-        print(args)
-        print(kwargs)
-        return None
-
-
-config = AutoConfig.from_pretrained("hakurei/litv2-6B-rev2")
+config = AutoConfig.from_pretrained("gpt2")
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
 inputs = tokenizer("Hello,", return_tensors="pt")
 model = AutoModelForCausalLM.from_config(config)
 
+del model.model
+model.model = None
+# mixin = GenerationMixin()
 print(type(model))
 output = model(**inputs)
 
