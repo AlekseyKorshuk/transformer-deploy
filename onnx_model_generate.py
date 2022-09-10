@@ -12,10 +12,10 @@ import time
 import matplotlib.pyplot as plt
 
 GENERATION_KWARGS = {
-    "max_new_tokens": 1,
+    "max_new_tokens": 64,
     # "min_new_tokens": 8,
     'eos_token_id': 198,
-    'do_sample': True,
+    'do_sample': False,
     'pad_token_id': 198,
     'temperature': 0.72,
     'top_k': 0,
@@ -69,7 +69,7 @@ for i in tqdm.tqdm(X):
     output = mixin.generate(**inputs, **GENERATION_KWARGS)
     duration = time.time() - start_time
     Y_onnx.append(duration)
-    # onnx_outputs.append(output)
+    onnx_outputs.append(tokenizer.decode(output))
 
 del onnx_model
 del mixin.onnx_model
@@ -82,10 +82,10 @@ with torch.no_grad():
     for i in tqdm.tqdm(X):
         inputs = tokenizer(i, return_tensors="pt").to(0)
         start_time = time.time()
-        result = torch_model.generate(**inputs, **GENERATION_KWARGS)
+        output = torch_model.generate(**inputs, **GENERATION_KWARGS)
         duration = time.time() - start_time
         Y_torch.append(duration)
-        # torch_outputs.append(result)
+        torch_outputs.append(tokenizer.decode(output))
 
 # print(result)
 plt.plot(list(range(len(X))), Y_torch, label="torch")
@@ -94,3 +94,9 @@ plt.legend()
 
 plt.savefig('plot.png')
 plt.show()
+
+for torch, onnx in zip(torch_outputs, onnx_outputs):
+    print(torch)
+    print("-" * 100)
+    print(onnx)
+    print("#" * 100)
