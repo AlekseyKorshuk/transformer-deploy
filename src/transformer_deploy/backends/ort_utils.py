@@ -269,7 +269,7 @@ def inference_onnx_binding(
         #     # int32 mandatory as input of bindings, int64 not supported
         #     tensor = tensor.type(dtype=torch.int32)
         tensor = tensor.contiguous()
-        print(f"pointer to input_onnx.name: {tensor.data_ptr()}")
+        print(f"pointer to {input_onnx.name}: {tensor.data_ptr()}")
         binding.bind_input(
             name=input_onnx.name,
             device_type=device,
