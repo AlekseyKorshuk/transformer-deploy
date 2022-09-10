@@ -127,6 +127,7 @@ class ONNXWrapper(GenerationMixin):
 
         inputs["attention_mask"] = inputs["attention_mask"]  # .float()
         # print(to_pt(past))
+        print(len(past.values()[0]))
         try:
             outputs = inference_onnx_binding(
                 model_onnx=self.session,
@@ -139,7 +140,7 @@ class ONNXWrapper(GenerationMixin):
             print("DONE")
             # print(outputs)
         except Exception as ex:
-            # print(ex)
+            print(ex)
             outputs = to_pt(
                 self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
             logits = outputs[0]
