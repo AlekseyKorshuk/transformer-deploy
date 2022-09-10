@@ -129,7 +129,6 @@ class ONNXWrapper(GenerationMixin):
 
         element = past[list(past.keys())[0]]
 
-        print(f"PAST AS INPUT: {past.keys()}")
         if element.shape[2] != 0:
             outputs = inference_onnx_binding(
                 model_onnx=self.session,

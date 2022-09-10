@@ -255,7 +255,6 @@ def inference_onnx_binding(
     assert device in ["cpu", "cuda"], f"unexpected inference device: '{device}'"
     if output_names is None:
         output_names = [out.name for out in model_onnx.get_outputs()]
-    print(output_names)
     if binding is None:
         binding: IOBinding = model_onnx.io_binding()
     else:
