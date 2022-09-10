@@ -1,4 +1,4 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 
 
 class OnnxModel(AutoModelForCausalLM):
@@ -12,9 +12,10 @@ class OnnxModel(AutoModelForCausalLM):
         return None
 
 
+config = AutoConfig.from_pretrained("hakurei/litv2-6B-rev2")
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
 inputs = tokenizer("Hello,", return_tensors="pt")
-model = AutoModelForCausalLM.from_config("hakurei/litv2-6B-rev2")
+model = AutoModelForCausalLM.from_config(config)
 
 print(type(model))
 output = model(**inputs)
