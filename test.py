@@ -126,7 +126,8 @@ class ONNXWrapper(GenerationMixin):
     def __call__(self, inputs, past=None, **kwargs) -> CausalLMOutputWithPast:
 
         inputs["attention_mask"] = inputs["attention_mask"]  # .float()
-        outputs = inference_onnx_binding(model_onnx=self.session, inputs={**inputs, **past}, device="cuda")
+        outputs = inference_onnx_binding(model_onnx=self.session, inputs={**to_pt(inputs), **to_pt(past)},
+                                         device="cuda")
 
         # outputs = to_pt(
         #     self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
