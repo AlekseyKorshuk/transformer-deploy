@@ -61,6 +61,7 @@ with torch.no_grad():
         duration = time.time() - start_time
         Y_torch.append(duration)
         torch_outputs.append(result)
+torch_model.to("cpu")
 del torch_model
 
 model_path = "onnx-lit/model.onnx"
