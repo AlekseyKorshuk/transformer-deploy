@@ -6,6 +6,7 @@ tokenizer = AutoTokenizer.from_pretrained("gpt2")
 inputs = tokenizer("Hello,", return_tensors="pt")
 model = AutoModelForCausalLM.from_config(config)
 
+print(model.__dict__)
 del model.model
 model.model = None
 # mixin = GenerationMixin()
