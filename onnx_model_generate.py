@@ -46,6 +46,10 @@ class InferenceSessionWithIOBinding(InferenceSession):
         return logits
 
 
+dataset = load_dataset("ChaiML/user_model_inputs")
+
+X = dataset["train"]["text"][:10]
+
 torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
 Y_torch = []
 torch_outputs = []
@@ -69,10 +73,6 @@ mixin = GenerationMixin(
     model=model,
     onnx_model=onnx_model
 )
-
-dataset = load_dataset("ChaiML/user_model_inputs")
-
-X = dataset["train"]["text"][:10]
 
 Y_onnx = []
 onnx_outputs = []
