@@ -270,6 +270,8 @@ def inference_onnx_binding(
         #     tensor = tensor.type(dtype=torch.int32)
         tensor = tensor.contiguous()
         print(f"pointer to {input_onnx.name}: {tensor.data_ptr()}")
+        if tensor.data_ptr() == 0:
+            continue
         binding.bind_input(
             name=input_onnx.name,
             device_type=device,
