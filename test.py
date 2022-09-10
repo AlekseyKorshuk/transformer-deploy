@@ -130,7 +130,7 @@ class ONNXWrapper(GenerationMixin):
         element = past[list(past.keys())[0]]
 
         print("######")
-        if element.shape[2] != 0:
+        if element.shape[2] != 0 or True:
             start_time = time.time()
             outputs = inference_onnx_binding(
                 model_onnx=self.session,
