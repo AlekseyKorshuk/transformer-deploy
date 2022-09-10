@@ -127,6 +127,7 @@ class ONNXWrapper(GenerationMixin):
 
         inputs["attention_mask"] = inputs["attention_mask"]  # .float()
         # print(to_pt(past))
+        print(past)
         element = past[list(past.keys())[0]]
         print(element)
         print(len(element))
