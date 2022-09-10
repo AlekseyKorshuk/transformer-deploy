@@ -128,16 +128,16 @@ class ONNXWrapper(GenerationMixin):
 
         element = past[list(past.keys())[0]]
 
-        print("######")
+        # print("######")
         if element.shape[2] != 0 or True:
-            start_time = time.time()
+            # start_time = time.time()
             outputs = inference_onnx_binding(
                 model_onnx=self.session,
                 inputs={**inputs, **to_pt(past)},
                 device="cuda",
                 output_names=self.output_names
             )
-            print(f"inference_onnx_binding: {time.time() - start_time}")
+            # print(f"inference_onnx_binding: {time.time() - start_time}")
             logits = outputs.pop("logits")
             past_key_values = {k: v for k, v in zip(self.past_keys, outputs.values())}
         if False:
