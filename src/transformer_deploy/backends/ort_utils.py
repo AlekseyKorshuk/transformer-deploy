@@ -272,7 +272,7 @@ def inference_onnx_binding(
         # print(f"pointer to {input_onnx.name}: {tensor.data_ptr()}")
 
         if tensor.data_ptr() == 0:
-            ortvalue = OrtValue.ortvalue_from_sp(
+            ortvalue = OrtValue.ortvalue_from_numpy(
                 tensor.cpu().numpy(),
                 'cuda', 0
             )

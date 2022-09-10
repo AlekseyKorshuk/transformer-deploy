@@ -138,7 +138,7 @@ class ONNXWrapper(GenerationMixin):
                 device="cuda",
                 output_names=self.output_names
             )
-            # print(f"inference_onnx_binding: {time.time() - start_time}")
+            print(f"inference_onnx_binding: {time.time() - start_time}")
             logits = outputs.pop("logits")
             past_key_values = {k: v for k, v in zip(self.past_keys, outputs.values())}
         if False:
