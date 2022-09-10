@@ -57,7 +57,7 @@ with torch.no_grad():
     for i in tqdm.tqdm(X):
         inputs = tokenizer(i, return_tensors="pt").to(0)
         start_time = time.time()
-        result = torch_model(**inputs, **GENERATION_KWARGS)
+        result = torch_model.generate(**inputs, **GENERATION_KWARGS)
         duration = time.time() - start_time
         Y_torch.append(duration)
         torch_outputs.append(result)
