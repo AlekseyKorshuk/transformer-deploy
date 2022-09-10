@@ -129,25 +129,27 @@ class ONNXWrapper(GenerationMixin):
 
         element = past[list(past.keys())[0]]
 
-        start_time = time.time()
-        if element.shape[2] != 0:
-            print("inference_onnx_binding")
+        print("######")
+        if element.shape[2] != 0 or True:
+            start_time = time.time()
             outputs = inference_onnx_binding(
                 model_onnx=self.session,
                 inputs={**inputs, **to_pt(past)},
                 device="cuda",
                 output_names=self.output_names
             )
+            print(f"inference_onnx_binding: {time.time() - start_time}")
             logits = outputs.pop("logits")
             past_key_values = {k: v for k, v in zip(self.past_keys, outputs.values())}
-        else:
-            print("session.run")
+        elif True:
+            print("-------")
+            start_time = time.time()
             outputs = to_pt(
                 self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
+            print(f"inference_onnx_binding: {time.time() - start_time}")
             logits = outputs[0]
             past_key_values = {k: v for k, v in zip(self.past_keys, outputs[1:])}
-        end_time = time.time()
-        print(end_time - start_time)
+
 
         return CausalLMOutputWithPast(
             logits=logits,
