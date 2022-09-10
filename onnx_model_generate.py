@@ -56,7 +56,6 @@ mixin = GenerationMixin(
     onnx_model=onnx_model
 )
 
-print(output)
 
 dataset = load_dataset("ChaiML/user_model_inputs")
 
