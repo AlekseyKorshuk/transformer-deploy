@@ -127,28 +127,14 @@ class ONNXWrapper(GenerationMixin):
 
         inputs["attention_mask"] = inputs["attention_mask"]  # .float()
 
-        element = past[list(past.keys())[0]]
-
-        # print("######")
-        if element.shape[2] != 0 or True:
-            # start_time = time.time()
-            outputs = inference_onnx_binding(
-                model_onnx=self.session,
-                inputs={**inputs, **to_pt(past)},
-                device="cuda",
-                output_names=self.output_names
-            )
-            # print(f"inference_onnx_binding: {time.time() - start_time}")
-            logits = outputs.pop("logits")
-            past_key_values = {k: v for k, v in zip(self.past_keys, outputs.values())}
-        if False:
-            # print("-------")
-            start_time = time.time()
-            outputs = to_pt(
-                self.session.run(output_names=self.output_names, input_feed={**to_numpy(inputs), **to_numpy(past)}))
-            # print(f"self.session.run: {time.time() - start_time}")
-            logits = outputs[0]
-            past_key_values = {k: v for k, v in zip(self.past_keys, outputs[1:])}
+        outputs = inference_onnx_binding(
+            model_onnx=self.session,
+            inputs={**inputs, **to_pt(past)},
+            device="cuda",
+            output_names=self.output_names
+        )
+        logits = outputs.pop("logits")
+        past_key_values = {k: v for k, v in zip(self.past_keys, outputs.values())}
 
         return CausalLMOutputWithPast(
             logits=logits,
@@ -158,7 +144,7 @@ class ONNXWrapper(GenerationMixin):
 
 model_id = "hakurei/litv2-6B-rev2"
 config = AutoConfig.from_pretrained(model_id)
-model = ONNXWrapper("onnx-lit-with-past/model.onnx", config)
+model = ONNXWrapper("/model-storage/onnx-lit-v2-with-past/model.onnx", config)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 dataset = load_dataset("ChaiML/user_model_inputs")
