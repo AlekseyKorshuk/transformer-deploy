@@ -197,12 +197,11 @@ def inference_onnx_binding(
         # tensor = tensor.type(dtype=torch.int64)
         tensor = tensor.contiguous()
         # print(f"pointer to {input_onnx.name}: {tensor.data_ptr()}")
-        print(tensor.dtype)
-        print(torch_to_numpy_dtype_dict[tensor.dtype])
+
         if tensor.data_ptr() == 0:
             ortvalue = OrtValue.ortvalue_from_shape_and_type(
                 tensor.shape,
-                np.float16,
+                torch_to_numpy_dtype_dict[tensor.dtype],
                 'cuda', 0
             )
             binding.bind_ortvalue_input(input_onnx.name, ortvalue)
