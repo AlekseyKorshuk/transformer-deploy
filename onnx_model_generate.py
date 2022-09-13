@@ -42,7 +42,7 @@ MODEL_FILENAME = "model.onnx"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
 
 config = AutoConfig.from_pretrained(MODEL_ID)
-fp16_model = ONNXWrapper(os.path.join(MODEL_PATH, FP16_MODEL_FILENAME), config)
+fp16_model = ONNXWrapper(os.path.join(MODEL_PATH, MODEL_FILENAME), config)
 
 Y_onnx = []
 onnx_outputs = []
