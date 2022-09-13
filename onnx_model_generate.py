@@ -27,11 +27,9 @@ GENERATION_KWARGS = {
     'repetition_penalty': 1.13,
 }
 
-tokenizer = AutoTokenizer.from_pretrained("gpt2")
-
 dataset = load_dataset("ChaiML/user_model_inputs")
 
-X = dataset["train"]["text"][:10]
+X = dataset["train"]["text"][:1000]
 
 model_path = "onnx-lit/model.onnx"
 provider = "CUDAExecutionProvider"
@@ -40,6 +38,8 @@ MODEL_ID = "hakurei/litv2-6B-rev2"
 MODEL_PATH = "/model-storage/onnx-lit-v2-with-past-new"
 FP16_MODEL_FILENAME = "model_fp16.onnx"
 MODEL_FILENAME = "model.onnx"
+
+tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
 
 config = AutoConfig.from_pretrained(MODEL_ID)
 fp16_model = ONNXWrapper(os.path.join(MODEL_PATH, FP16_MODEL_FILENAME), config)
