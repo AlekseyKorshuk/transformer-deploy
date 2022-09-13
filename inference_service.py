@@ -194,7 +194,7 @@ def inference_onnx_binding(
         tensor = tensor.detach()
         # if tensor.dtype in [torch.int64, torch.long]:
         #     # int32 mandatory as input of bindings, int64 not supported
-        tensor = tensor.type(dtype=torch.float16)
+        tensor = tensor.type(dtype=torch.int64)
         tensor = tensor.contiguous()
         # print(f"pointer to {input_onnx.name}: {tensor.data_ptr()}")
 
