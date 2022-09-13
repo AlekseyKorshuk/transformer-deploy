@@ -56,7 +56,7 @@ for i in tqdm.tqdm(X):
 
 del fp16_model
 
-torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").to(0)
+torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").half().to(0)
 Y_torch = []
 torch_outputs = []
 with torch.no_grad():
