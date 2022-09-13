@@ -1,6 +1,6 @@
 from inference_service import ONNXWrapper
 import os
-from transformers import AutoConfig
+from transformers import AutoConfig, AutoTokenizer
 import time
 
 MODEL_ID = "hakurei/litv2-6B-rev2"
@@ -12,5 +12,9 @@ start_time = time.time()
 config = AutoConfig.from_pretrained(MODEL_ID)
 model = ONNXWrapper(os.path.join(MODEL_PATH, MODEL_FILENAME), config)
 print(f"Model loaded in {time.time() - start_time} seconds")
-print("END TEST")
+
+tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+inputs = tokenizer("Test", return_tensors="pt").to(0)
+outputs = model.generate(**inputs)
+print(outputs)
 input("Enter to exit")
