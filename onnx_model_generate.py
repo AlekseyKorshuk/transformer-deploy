@@ -29,7 +29,7 @@ GENERATION_KWARGS = {
 
 dataset = load_dataset("ChaiML/user_model_inputs")
 
-X = dataset["train"]["text"][:1000]
+X = dataset["train"]["text"][:100]
 
 model_path = "onnx-lit/model.onnx"
 provider = "CUDAExecutionProvider"
@@ -56,7 +56,7 @@ for i in tqdm.tqdm(X):
 
 del fp16_model
 
-torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").half().to(0)
+torch_model = AutoModelForCausalLM.from_pretrained("hakurei/litv2-6B-rev2").half().eval().to(0)
 Y_torch = []
 torch_outputs = []
 with torch.no_grad():
