@@ -19,12 +19,12 @@ inputs = tokenizer("Test", return_tensors="pt").to(0)
 outputs = fp16_model.generate(**inputs)
 print(outputs)
 
-model = ONNXWrapper(os.path.join(MODEL_PATH, MODEL_FILENAME), config)
-print(f"Model loaded in {time.time() - start_time} seconds")
-
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-inputs = tokenizer("Test", return_tensors="pt").to(0)
-outputs = fp16_model.generate(**inputs)
-print(outputs)
+# model = ONNXWrapper(os.path.join(MODEL_PATH, MODEL_FILENAME), config)
+# print(f"Model loaded in {time.time() - start_time} seconds")
+#
+# tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+# inputs = tokenizer("Test", return_tensors="pt").to(0)
+# outputs = fp16_model.generate(**inputs)
+# print(outputs)
 
 input("Enter to exit")
