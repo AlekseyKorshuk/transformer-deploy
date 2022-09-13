@@ -8,7 +8,7 @@ from datasets import load_dataset
 import warnings
 
 dataset = load_dataset("ChaiML/user_model_inputs")
-model_id = "gpt2"
+model_id = "hakurei/litv2-6B-rev2"
 
 GENERATION_KWARGS = {
     "max_new_tokens": 32,
@@ -35,6 +35,7 @@ for example in tqdm.tqdm(INPUT_EXAMPLES, desc="Pytorch single batch"):
     inputs = tokenizer(example, return_tensors='pt').to(0)
     result = model.generate(**inputs, **GENERATION_KWARGS)
 
+model.to("cpu")
 ds_model = deepspeed.init_inference(
     model=model,  # Transformers models
     mp_size=1,  # Number of GPU
