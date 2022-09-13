@@ -76,8 +76,19 @@ plt.legend()
 plt.savefig('plot.png')
 plt.show()
 
-for torch, onnx in zip(torch_outputs, onnx_outputs):
-    print(torch)
-    print("-" * 100)
-    print(onnx)
-    print("#" * 100)
+# for torch, onnx in zip(torch_outputs, onnx_outputs):
+#     print(torch)
+#     print("-" * 100)
+#     print(onnx)
+#     print("#" * 100)
+
+import pandas as pd
+
+df = pd.DataFrame(
+    {
+        "torch": Y_torch,
+        "onnx": Y_onnx
+    }
+)
+
+print(df.describe())
