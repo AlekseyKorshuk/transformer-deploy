@@ -80,4 +80,3 @@ tensorrt_model: Callable[[Dict[str, torch.Tensor]], Dict[str, torch.Tensor]] = l
     runtime=runtime, engine_file_path=tensorrt_path
 )
 
-tensorrt_model
