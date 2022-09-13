@@ -9,7 +9,8 @@ print(type(new_onnx_model))
 output_path = "model_fp16.onnx"
 try:
     onnx.save(new_onnx_model, output_path, save_as_external_data=False)
-except:
-    onnx.save(new_onnx_model, output_path, save_as_external_data=False)
+except Exception as ex:
+    print(ex)
+    onnx.save(new_onnx_model, output_path, save_as_external_data=True)
 
 # save_model(new_onnx_model, 'model_fp16.onnx', use_external_data_format=True)
